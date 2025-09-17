@@ -17,10 +17,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NotesViewModel : ViewModel() {
@@ -39,18 +37,26 @@ class NotesViewModel : ViewModel() {
     private val scope = CoroutineScope(Dispatchers.IO)
 
     init {
-        query//1 это объект флоу и мы подписываемся на него при создании вьюмодели это строка
-            .flatMapLatest {//этот метод при изменении объекта флоу отменит старые подписки
-                if (it.isBlank()) {
+        addSomeNotes()
+        query//1 это объект флоу и мы подписываемся на него при создании вьюмодели (это строка)
+            .onEach { input: String ->//На каждый символ(это значение введенное пользователем
+                _state.update { it.copy(query = input) }//обновляем стейт делая  копию текущего стэйта
+                // в котором изменим свойства query
+            }
+            .flatMapLatest {//этот метод при изменении объекта флоу отменит старые подписки и подпишется на новый Flow
+                    input: String ->
+                if (input.isBlank()) {
                     getAllNotesUseCase()//2 тут мы переключаемся на этот поток данных и работаем с ним
-                        // в блоке onEach
+                    // в блоке onEach
                 } else {
-                    searchNotesUseCase(it)//or this thread
+                    searchNotesUseCase(input)//or this thread
                 }
             }
             .onEach {//Работаем с оьъектом Флоу
-                val pinnedNotes = it.filter { it.isPinned }//4 реагируем на каждый новый элемент в потоке
-                val otherNotes = it.filter { !it.isPinned }
+                    notes ->
+                val pinnedNotes =
+                    notes.filter { it.isPinned }//4 реагируем на каждый новый элемент в потоке
+                val otherNotes = notes.filter { !it.isPinned }
                 _state.update { it.copy(pinnedNotes = pinnedNotes, otherNotes = otherNotes) }
             }
             .launchIn(scope)//3 Подписываемся на этот поток
@@ -60,6 +66,11 @@ class NotesViewModel : ViewModel() {
 
     }
 
+    private fun addSomeNotes() {
+        repeat(50){
+            addNoteUseCase(title = "Title $it", content = "Content: $it")
+        }
+    }
     fun proccessCommand(command: NotesCommand) {
         when (command) {
             is NotesCommand.DeleteNote -> {
@@ -67,11 +78,15 @@ class NotesViewModel : ViewModel() {
             }
 
             is NotesCommand.EditNote -> {
-                val title = command.note.title
-                editNoteUseCase(command.note.copy(title = title + "edited"))
+                val note:Note = getNoteUseCase(command.note.id)
+                val title = note.title
+                editNoteUseCase(note.copy(title = title + "edited"))
             }
 
-            is NotesCommand.InputSearchCommands -> {}
+            is NotesCommand.InputSearchQuery -> {
+                query.update { command.query.trim() }//тут запрос будет отправлен в обьект Flow
+            }
+
             is NotesCommand.SwitchPinnedStatus -> {
                 switchPinnedStatusUseCase(command.noteId)
             }
@@ -80,7 +95,7 @@ class NotesViewModel : ViewModel() {
 }
 
 sealed interface NotesCommand {
-    data class InputSearchCommands(val query: String) : NotesCommand
+    data class InputSearchQuery(val query: String) : NotesCommand
     data class SwitchPinnedStatus(val noteId: Int) : NotesCommand
 
     //temp
