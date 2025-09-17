@@ -39,20 +39,21 @@ class NotesViewModel : ViewModel() {
     private val scope = CoroutineScope(Dispatchers.IO)
 
     init {
-        query
-            .flatMapLatest {
+        query//1 это объект флоу и мы подписываемся на него при создании вьюмодели это строка
+            .flatMapLatest {//этот метод при изменении объекта флоу отменит старые подписки
                 if (it.isBlank()) {
-                    getAllNotesUseCase()
+                    getAllNotesUseCase()//2 тут мы переключаемся на этот поток данных и работаем с ним
+                        // в блоке onEach
                 } else {
-                    searchNotesUseCase(it)
+                    searchNotesUseCase(it)//or this thread
                 }
             }
-            .onEach {
-                val pinnedNotes = it.filter { it.isPinned }
+            .onEach {//Работаем с оьъектом Флоу
+                val pinnedNotes = it.filter { it.isPinned }//4 реагируем на каждый новый элемент в потоке
                 val otherNotes = it.filter { !it.isPinned }
-                _state.update{it.copy(pinnedNotes = pinnedNotes, otherNotes = otherNotes)}
+                _state.update { it.copy(pinnedNotes = pinnedNotes, otherNotes = otherNotes) }
             }
-            .launchIn(scope)
+            .launchIn(scope)//3 Подписываемся на этот поток
 //        scope.launch {
 //            query.collect {  }
 //        }
