@@ -33,7 +33,7 @@ class NotesViewModel : ViewModel() {
     private val query: MutableStateFlow<String> = MutableStateFlow("")
 
     private val _state: MutableStateFlow<NotesScreenState> = MutableStateFlow(NotesScreenState())
-    private val state = _state.asStateFlow()
+     val state = _state.asStateFlow()
     private val scope = CoroutineScope(Dispatchers.IO)
 
     init {
