@@ -27,7 +27,8 @@ fun NotesScreen(
     viewModel: NotesViewModel = viewModel()
 ) {
     // val state: State<NotesScreenState> = viewModel.state.collectAsState()// без делегата
-    val state: NotesScreenState by viewModel.state.collectAsState()// Забираем стэйт экрана из вьюмодели
+    val state: NotesScreenState by viewModel.state.collectAsState()// В переменную типа State(работает
+    // с Compose)записываем StateFlow из вьюмодели.
     //val currentState: NotesScreenState = state.value// с делегатом уже не нужно value
     // val scrollState = remember { ScrollState(0) }
 

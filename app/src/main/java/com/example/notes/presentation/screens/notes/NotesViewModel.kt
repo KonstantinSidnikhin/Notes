@@ -31,17 +31,17 @@ class NotesViewModel : ViewModel() {
     private val searchNotesUseCase = SearchNotesUseCase(repository)
     private val switchPinnedStatusUseCase = SwitchPinnedStatusUseCase(repository)
     private val query: MutableStateFlow<String> =
-        MutableStateFlow("")//это коробка со стэйтом строки, стэйт это обьект Flow
+        MutableStateFlow("")
 
     private val _state: MutableStateFlow<NotesScreenState> =
-        MutableStateFlow(NotesScreenState())//это коробка со стэйтом экрана. в нем три поля query pinnedNotes otherNotes
+        MutableStateFlow(NotesScreenState())//это коробка со стэйтФлоу экрана. в нем три поля query pinnedNotes otherNotes
 
     val state = _state.asStateFlow()//становится неизменяемым
     private val scope = CoroutineScope(Dispatchers.IO)
 
     init {
         addSomeNotes()
-        query//1 это объект флоу(стэйт) и мы подписываемся на него при создании вьюмодели (это строка)
+        query//1 это объект флоу и мы подписываемся на него при создании вьюмодели (это строка)
             .onEach { input: String ->//На каждый символ(это значение введенное пользователем
                 _state.update { it.copy(query = input) }//обновляем стейт делая  копию текущего стэйта
                 // в котором изменим свойства query
