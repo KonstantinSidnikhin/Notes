@@ -1,10 +1,13 @@
 package com.example.notes.presentation.screens.notes
 
+import android.R
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,7 +48,7 @@ fun NotesScreen(
 
     LazyColumn(
         modifier = modifier
-            .padding(top = 48.dp),
+            .padding(top = 48.dp, start = 24.dp, end = 24.dp),
         //.verticalScroll(rememberScrollState()),\\в лэйзи колум уже под капотом есть срол стэйт
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -53,14 +57,22 @@ fun NotesScreen(
         }
         item {
             SearchBar(
+                modifier = Modifier.padding(horizontal = 24.dp),
                 query = state.query,
-                onQueryChange = {
-                    viewModel.proccessCommand(NotesCommand.InputSearchQuery(it))
+                // query = "something",
+                onQueryChange = {//в описании функции (в низу)мы просто сделали пустышку а тут описали функционал
+                    viewModel.proccessCommand(NotesCommand.InputSearchQuery(it))//тут меняют в стэйте экрана параметр query
+                    // и экран перерисовывает заметки содержащие строку == query в контенте или тайтле
                 }
             )
         }
         item {
-            Subtitle(text = "Pinned")
+
+            Subtitle(
+                modifier = Modifier.padding(horizontal = 24.dp),
+                text = "Pinned"
+            )
+
         }
 
         item {
@@ -69,7 +81,8 @@ fun NotesScreen(
                     .fillMaxWidth()
                     .padding(8.dp),
 //                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp)
             ) {
                 state.pinnedNotes.forEach { note ->
                     item(key = note.id) {//привязываем ключ айтема в ui compose к заметке Note/ если заметок стало меньше, то айтемов тоже мен
@@ -91,7 +104,7 @@ fun NotesScreen(
                 }
             }
         }
-        item{
+        item {
             Subtitle(text = "Others")
         }
         items(
@@ -99,19 +112,21 @@ fun NotesScreen(
             key = { it.id }//привязываем ключ айтема в ui compose к заметке Note/ если заметок стало меньше, то айтемов тоже меньше
         ) { note: Note ->
             NoteCard(
-                Modifier.fillMaxWidth(),
-                    note = note,
-                    onNoteClick = {
-                        viewModel.proccessCommand(NotesCommand.EditNote(it))
-                    },
-                    onDoubleClick = {
-                        viewModel.proccessCommand(NotesCommand.DeleteNote(note.id))
-                    },
-                    onLongClick = {
-                        viewModel.proccessCommand(NotesCommand.SwitchPinnedStatus(note.id))
-                    },
-                    backgroundColor = Green
-                )
+                modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 24.dp),
+                note = note,
+                onNoteClick = {
+                    viewModel.proccessCommand(NotesCommand.EditNote(it))
+                },
+                onDoubleClick = {
+                    viewModel.proccessCommand(NotesCommand.DeleteNote(note.id))
+                },
+                onLongClick = {
+                    viewModel.proccessCommand(NotesCommand.SwitchPinnedStatus(note.id))
+                },
+                
+                backgroundColor = Green
+            )
         }
 //        state.otherNotes.forEach { note ->
 //            item {
@@ -159,7 +174,15 @@ private fun SearchBar(
     onQueryChange: (String) -> Unit
 ) {
     TextField(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.onSurface)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                shape = RoundedCornerShape(10.dp)
+            ),
+
         value = query,
         onValueChange = onQueryChange,
         placeholder = {
@@ -169,10 +192,18 @@ private fun SearchBar(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedContainerColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+
+            ),
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
-                contentDescription = "Search notes"
+                contentDescription = "Search notes",
+                tint = MaterialTheme.colorScheme.onSurface
             )
         },
         shape = RoundedCornerShape(10.dp)
@@ -243,3 +274,11 @@ fun NoteCard(
     }
 
 }
+
+//=======================
+//@Composable
+//private fun SearchBarTwo(
+//
+//
+//}
+

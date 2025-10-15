@@ -41,7 +41,7 @@ class NotesViewModel : ViewModel() {
 
     init {
         addSomeNotes()
-        query//1 это объект флоу и мы подписываемся на него при создании вьюмодели (это строка)
+        query//1 это объект флоу и мы подписываемся на него при создании вьюмодели (это строка) она появляется только когда мы что то пишем в поле поиска
             .onEach { input: String ->//На каждый символ(это значение введенное пользователем
                 _state.update { it.copy(query = input) }//обновляем стейт делая  копию текущего стэйта
                 // в котором изменим свойства query
@@ -78,7 +78,7 @@ class NotesViewModel : ViewModel() {
     fun proccessCommand(command: NotesCommand) {
         when (command) {
             is NotesCommand.DeleteNote -> {
-                deleteNoteUseCase(command.noteIde)
+                deleteNoteUseCase(command.noteId)
             }
 
             is NotesCommand.EditNote -> {
@@ -89,7 +89,8 @@ class NotesViewModel : ViewModel() {
             }
 
             is NotesCommand.InputSearchQuery -> {
-                query.update { command.query.trim() }//тут запрос будет отправлен в обьект Flow
+                query.update { command.query.trim() }//тут запрос будет отправлен в обьект Flow(query) стэйт экрана меняетя и компоуз перерисовывает экран
+
             }
 
             is NotesCommand.SwitchPinnedStatus -> {
@@ -104,7 +105,7 @@ sealed interface NotesCommand {
     data class SwitchPinnedStatus(val noteId: Int) : NotesCommand
 
     //temp
-    data class DeleteNote(val noteIde: Int) : NotesCommand
+    data class DeleteNote(val noteId: Int) : NotesCommand
     data class EditNote(val note: Note) : NotesCommand
 }
 
