@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
 object TestNotesRepositoryImpl : NotesRepository {
-    private val notesListFlow = MutableStateFlow<List<Note>>(listOf())
+        private val notesListFlow = MutableStateFlow<List<Note>>(listOf())
     // override fun addNote(note: Note) {
     // val newNotes = notesListFlow.value.toMutableList()
     // newNotes.add(note)
@@ -89,5 +89,6 @@ object TestNotesRepositoryImpl : NotesRepository {
             }
         }
     }
+
 
 }

@@ -1,18 +1,19 @@
 package com.example.notes.presentation.screens.notes
 
-import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notes.domain.Note
 import com.example.notes.presentation.ui.theme.Green
+import com.example.notes.presentation.ui.theme.OtherNotesColors
 import com.example.notes.presentation.ui.theme.Yellow200
 
 @Composable
@@ -48,20 +50,25 @@ fun NotesScreen(
 
     LazyColumn(
         modifier = modifier
-            .padding(top = 48.dp, start = 24.dp, end = 24.dp),
+            .padding(
+                top = 48.dp,
+            ),
         //.verticalScroll(rememberScrollState()),\\в лэйзи колум уже под капотом есть срол стэйт
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
-            Title(text = "All notes")
+
+            Title(
+                modifier = Modifier.padding(horizontal = 24.dp),
+                text = "All notes"
+            )
         }
         item {
             SearchBar(
                 modifier = Modifier.padding(horizontal = 24.dp),
                 query = state.query,
-                // query = "something",
                 onQueryChange = {//в описании функции (в низу)мы просто сделали пустышку а тут описали функционал
-                    viewModel.proccessCommand(NotesCommand.InputSearchQuery(it))//тут меняют в стэйте экрана параметр query
+                    viewModel.processCommand(NotesCommand.InputSearchQuery(it))//тут меняют в стэйте экрана параметр query
                     // и экран перерисовывает заметки содержащие строку == query в контенте или тайтле
                 }
             )
@@ -89,13 +96,13 @@ fun NotesScreen(
                         NoteCard(
                             note = note,
                             onNoteClick = {
-                                viewModel.proccessCommand(NotesCommand.EditNote(it))
+                                viewModel.processCommand(NotesCommand.EditNote(it))
                             },
                             onDoubleClick = {
-                                viewModel.proccessCommand(NotesCommand.DeleteNote(note.id))
+                                viewModel.processCommand(NotesCommand.DeleteNote(note.id))
                             },
                             onLongClick = {
-                                viewModel.proccessCommand(NotesCommand.SwitchPinnedStatus(note.id))
+                                viewModel.processCommand(NotesCommand.SwitchPinnedStatus(note.id))
                             },
                             backgroundColor = Yellow200
                         )
@@ -105,49 +112,35 @@ fun NotesScreen(
             }
         }
         item {
-            Subtitle(text = "Others")
-        }
-        items(
-            state.otherNotes,
-            key = { it.id }//привязываем ключ айтема в ui compose к заметке Note/ если заметок стало меньше, то айтемов тоже меньше
-        ) { note: Note ->
-            NoteCard(
-                modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 24.dp),
-                note = note,
-                onNoteClick = {
-                    viewModel.proccessCommand(NotesCommand.EditNote(it))
-                },
-                onDoubleClick = {
-                    viewModel.proccessCommand(NotesCommand.DeleteNote(note.id))
-                },
-                onLongClick = {
-                    viewModel.proccessCommand(NotesCommand.SwitchPinnedStatus(note.id))
-                },
-                
-                backgroundColor = Green
+
+            Subtitle(
+                modifier = Modifier.padding(24.dp),
+                text = "Others"
             )
         }
-//        state.otherNotes.forEach { note ->
-//            item {
-//                NotesCard(
-//                    note = note,
-//                    onNoteClick = {
-//                        viewModel.proccessCommand(NotesCommand.SwitchPinnedStatus(note.id))
-//                    }
-//                )
-//            }
+        itemsIndexed(
+            items = state.otherNotes,
+            key = { index, note -> note.id }//привязываем ключ айтема в ui compose к заметке Note/ если заметок стало меньше, то айтемов тоже меньше
+        ) { index, note: Note ->
+            NoteCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                note = note,
+                onNoteClick = {
+                    viewModel.processCommand(NotesCommand.EditNote(it))
+                },
+                onDoubleClick = {
+                    viewModel.processCommand(NotesCommand.DeleteNote(note.id))
+                },
+                onLongClick = {
+                    viewModel.processCommand(NotesCommand.SwitchPinnedStatus(note.id))
+                },
 
-//            Text(
-//                modifier = Modifier.clickable {
-//                    //viewModel.proccessCommand(NotesCommand.EditNote(note))
-//                    viewModel.proccessCommand(NotesCommand.SwitchPinnedStatus(note.id))
-//                },
-//            text = "${note.title} - ${note.content}",
-//            fontSize = 24.sp
-//            )
+                backgroundColor = OtherNotesColors[index % OtherNotesColors.size]
+            )
+        }
 
-        //      }
 
     }
 }
@@ -155,12 +148,12 @@ fun NotesScreen(
 @Composable
 private fun Title(
     modifier: Modifier = Modifier,
-    text: String,
+    text: String,//placeholder - сюда мы подставим значение при выхове функции
 
-    ) {
+) {
     Text(
         modifier = modifier,
-        text = text,
+        text = text,// первый text это встроенный параметр у Text, мы в него передаем значение из плэйсхолдера
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onBackground
@@ -182,19 +175,18 @@ private fun SearchBar(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 shape = RoundedCornerShape(10.dp)
             ),
-
         value = query,
         onValueChange = onQueryChange,
         placeholder = {
             Text(
                 text = "Search...",
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onPrimary
             )
         },
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            unfocusedContainerColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
 
@@ -210,6 +202,7 @@ private fun SearchBar(
 
     )
 }
+
 
 @Composable
 private fun Subtitle(
@@ -250,6 +243,7 @@ fun NoteCard(
                 }
 
             )
+            .padding(16.dp)
     ) {
         Text(
 
@@ -257,11 +251,17 @@ fun NoteCard(
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurface
         )
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
         Text(
 
             text = note.updatedAt.toString(),
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(
+            modifier = Modifier.height(24.dp)
         )
         Text(
 
@@ -275,10 +275,5 @@ fun NoteCard(
 
 }
 
-//=======================
-//@Composable
-//private fun SearchBarTwo(
-//
-//
-//}
+
 

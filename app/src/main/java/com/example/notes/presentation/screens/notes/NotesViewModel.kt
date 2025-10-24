@@ -13,6 +13,8 @@ import com.example.notes.domain.SwitchPinnedStatusUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -55,6 +57,8 @@ class NotesViewModel : ViewModel() {
                     searchNotesUseCase(input)//or this thread
                 }
             }
+            // тут очень важно что передается в следующий блок результат  searchNotesUseCase-  Flow<List<Note>>
+            // и мы уже по этим элементам листа работаем
             .onEach {//Работаем с оьъектом Флоу
                     notes ->
                 val pinnedNotes =
@@ -67,7 +71,9 @@ class NotesViewModel : ViewModel() {
 //            query.collect {  }
 //        }
 
+
     }
+
 
     private fun addSomeNotes() {
         repeat(100) {
@@ -75,7 +81,7 @@ class NotesViewModel : ViewModel() {
         }
     }
 
-    fun proccessCommand(command: NotesCommand) {
+    fun processCommand(command: NotesCommand) {
         when (command) {
             is NotesCommand.DeleteNote -> {
                 deleteNoteUseCase(command.noteId)
@@ -90,7 +96,6 @@ class NotesViewModel : ViewModel() {
 
             is NotesCommand.InputSearchQuery -> {
                 query.update { command.query.trim() }//тут запрос будет отправлен в обьект Flow(query) стэйт экрана меняетя и компоуз перерисовывает экран
-
             }
 
             is NotesCommand.SwitchPinnedStatus -> {
@@ -98,6 +103,7 @@ class NotesViewModel : ViewModel() {
             }
         }
     }
+
 }
 
 sealed interface NotesCommand {
@@ -108,6 +114,7 @@ sealed interface NotesCommand {
     data class DeleteNote(val noteId: Int) : NotesCommand
     data class EditNote(val note: Note) : NotesCommand
 }
+
 
 data class NotesScreenState(
     val query: String = "",
