@@ -100,7 +100,8 @@ fun NotesScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(horizontal = 24.dp)
             ) {
-                items(state.pinnedNotes, key = { it.id }) { note ->
+                //items(state.pinnedNotes, key = { it.id }) { note ->
+                    itemsIndexed(state.pinnedNotes, key = { index, note->note.id }) {index, note ->
                     NoteCard(
                         note = note,//тут первая note это поле в композ функции , а вторую ноут мы подставляем  как наш элемент
                         onNoteClick = {
@@ -112,7 +113,7 @@ fun NotesScreen(
                         onLongClick = {
                             viewModel.processCommand(NotesCommand.SwitchPinnedStatus(note.id))
                         },
-                        backgroundColor = Yellow200
+                        backgroundColor = PinnedNotesColors[index % PinnedNotesColors.size]
                     )
                 }
 
