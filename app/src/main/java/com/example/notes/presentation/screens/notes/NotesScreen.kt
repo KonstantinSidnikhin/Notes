@@ -1,9 +1,11 @@
 package com.example.notes.presentation.screens.notes
 
+import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -23,19 +25,25 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ComposeCompilerApi
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notes.domain.Note
 import com.example.notes.presentation.ui.theme.Green
 import com.example.notes.presentation.ui.theme.OtherNotesColors
+import com.example.notes.presentation.ui.theme.PinnedNotesColors
 import com.example.notes.presentation.ui.theme.Yellow200
+import org.w3c.dom.Text
+import kotlin.random.Random
 
 @Composable
 fun NotesScreen(
@@ -53,15 +61,16 @@ fun NotesScreen(
             .padding(
                 top = 48.dp,
             ),
-        //.verticalScroll(rememberScrollState()),\\в лэйзи колум уже под капотом есть срол стэйт
+        //.verticalScroll(rememberScrollState()),\\в лэйзи колум уже под капотом есть скрол стэйт
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
 
             Title(
                 modifier = Modifier.padding(horizontal = 24.dp),
-                text = "All notes"
-            )
+                text = "All notes",
+
+                )
         }
         item {
             SearchBar(
@@ -91,26 +100,27 @@ fun NotesScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(horizontal = 24.dp)
             ) {
-                state.pinnedNotes.forEach { note ->
-                    item(key = note.id) {//привязываем ключ айтема в ui compose к заметке Note/ если заметок стало меньше, то айтемов тоже мен
-                        NoteCard(
-                            note = note,
-                            onNoteClick = {
-                                viewModel.processCommand(NotesCommand.EditNote(it))
-                            },
-                            onDoubleClick = {
-                                viewModel.processCommand(NotesCommand.DeleteNote(note.id))
-                            },
-                            onLongClick = {
-                                viewModel.processCommand(NotesCommand.SwitchPinnedStatus(note.id))
-                            },
-                            backgroundColor = Yellow200
-                        )
-                    }
-
+                items(state.pinnedNotes, key = { it.id }) { note ->
+                    NoteCard(
+                        note = note,//тут первая note это поле в композ функции , а вторую ноут мы подставляем  как наш элемент
+                        onNoteClick = {
+                            viewModel.processCommand(NotesCommand.EditNote(it))
+                        },
+                        onDoubleClick = {
+                            viewModel.processCommand(NotesCommand.DeleteNote(note.id))
+                        },
+                        onLongClick = {
+                            viewModel.processCommand(NotesCommand.SwitchPinnedStatus(note.id))
+                        },
+                        backgroundColor = Yellow200
+                    )
                 }
+
             }
         }
+
+
+
         item {
 
             Subtitle(
@@ -120,8 +130,8 @@ fun NotesScreen(
         }
         itemsIndexed(
             items = state.otherNotes,
-            key = { index, note -> note.id }//привязываем ключ айтема в ui compose к заметке Note/ если заметок стало меньше, то айтемов тоже меньше
-        ) { index, note: Note ->
+            key = { index, item -> item.id }//привязываем ключ айтема в ui compose к заметке Note/ если заметок стало меньше, то айтемов тоже меньше
+        ) { index, note: Note ->// тут можно _, note:Note ->
             NoteCard(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -151,13 +161,20 @@ private fun Title(
     text: String,//placeholder - сюда мы подставим значение при выхове функции
 
 ) {
-    Text(
-        modifier = modifier,
-        text = text,// первый text это встроенный параметр у Text, мы в него передаем значение из плэйсхолдера
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.onBackground
-    )
+    Box(
+        modifier = modifier
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            modifier = modifier,
+            text = text,// первый text это встроенный параметр у Text, мы в него передаем значение из плэйсхолдера
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+
 }
 
 @Composable
@@ -172,7 +189,7 @@ private fun SearchBar(
             .background(MaterialTheme.colorScheme.onSurface)
             .border(
                 width = 1.dp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = MaterialTheme.colorScheme.onSurface,
                 shape = RoundedCornerShape(10.dp)
             ),
         value = query,
@@ -181,7 +198,7 @@ private fun SearchBar(
             Text(
                 text = "Search...",
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onBackground
             )
         },
         colors = TextFieldDefaults.colors(
@@ -198,6 +215,7 @@ private fun SearchBar(
                 tint = MaterialTheme.colorScheme.onSurface
             )
         },
+
         shape = RoundedCornerShape(10.dp)
 
     )
@@ -274,6 +292,4 @@ fun NoteCard(
     }
 
 }
-
-
 
