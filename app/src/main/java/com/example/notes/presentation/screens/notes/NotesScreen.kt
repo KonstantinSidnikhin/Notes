@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,6 +44,7 @@ import com.example.notes.presentation.ui.theme.Green
 import com.example.notes.presentation.ui.theme.OtherNotesColors
 import com.example.notes.presentation.ui.theme.PinnedNotesColors
 import com.example.notes.presentation.ui.theme.Yellow200
+import com.example.notes.presentation.utils.DateFormatter
 import org.w3c.dom.Text
 import kotlin.random.Random
 
@@ -101,8 +104,11 @@ fun NotesScreen(
                 contentPadding = PaddingValues(horizontal = 24.dp)
             ) {
                 //items(state.pinnedNotes, key = { it.id }) { note ->
-                itemsIndexed(state.pinnedNotes, key = { index, note -> note.id }) { index, note ->
+                itemsIndexed(
+                    state.pinnedNotes,
+                    key = { index, note -> note.id }) { index, note ->
                     NoteCard(
+                        modifier = Modifier.widthIn(max = 160.dp),// ограничили количество знаков внутри заметки
                         note = note,//тут первая note это поле в композ функции , а вторую ноут мы подставляем  как наш элемент
                         onNoteClick = {
                             viewModel.processCommand(NotesCommand.EditNote(it))
@@ -267,16 +273,20 @@ fun NoteCard(
 
             text = note.title,
             fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurface
+            maxLines = 1,// максимум одна строка
+            color = MaterialTheme.colorScheme.onSurface,
+            overflow = TextOverflow.Ellipsis
         )
         Spacer(
             modifier = Modifier.height(8.dp)
         )
         Text(
 
-            text = note.updatedAt.toString(),
+            text = DateFormatter.formatDateToString(note.updatedAt),//вызываем класс из Utils
             fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            overflow = TextOverflow.Ellipsis
+
         )
         Spacer(
             modifier = Modifier.height(24.dp)
@@ -285,6 +295,7 @@ fun NoteCard(
 
             text = note.content,
             fontSize = 16.sp,
+            maxLines = 3,// максимум три строки
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Medium
 
