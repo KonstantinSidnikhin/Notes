@@ -101,7 +101,7 @@ fun NotesScreen(
                 contentPadding = PaddingValues(horizontal = 24.dp)
             ) {
                 //items(state.pinnedNotes, key = { it.id }) { note ->
-                    itemsIndexed(state.pinnedNotes, key = { index, note->note.id }) {index, note ->
+                itemsIndexed(state.pinnedNotes, key = { index, note -> note.id }) { index, note ->
                     NoteCard(
                         note = note,//тут первая note это поле в композ функции , а вторую ноут мы подставляем  как наш элемент
                         onNoteClick = {
@@ -119,7 +119,6 @@ fun NotesScreen(
 
             }
         }
-
 
 
         item {
@@ -293,4 +292,3 @@ fun NoteCard(
     }
 
 }
-

@@ -1,6 +1,8 @@
 package com.example.notes.presentation.screens.notes
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.notes.data.TestNotesRepositoryImpl
 import com.example.notes.domain.AddNoteUseCase
 import com.example.notes.domain.DeleteNoteUseCase
@@ -13,6 +15,7 @@ import com.example.notes.domain.SwitchPinnedStatusUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +24,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NotesViewModel : ViewModel() {
@@ -39,7 +43,7 @@ class NotesViewModel : ViewModel() {
         MutableStateFlow(NotesScreenState())//это коробка со стэйтФлоу экрана. в нем три поля query pinnedNotes otherNotes
 
     val state = _state.asStateFlow()//становится неизменяемым
-    private val scope = CoroutineScope(Dispatchers.IO)
+        //private val scope = CoroutineScope(Dispatchers.IO)// под капотом назначена viewModelScope
 
     init {
         addSomeNotes()
@@ -66,43 +70,51 @@ class NotesViewModel : ViewModel() {
                 val otherNotes = notes.filter { !it.isPinned }
                 _state.update { it.copy(pinnedNotes = pinnedNotes, otherNotes = otherNotes) }
             }
-            .launchIn(scope)//3 Подписываемся на этот поток
-//        scope.launch {
-//            query.collect {  }
-//        }
+            .launchIn(viewModelScope)//3 Подписываемся на этот поток
 
 
     }
 
 
     private fun addSomeNotes() {
-        repeat(100) {
-            addNoteUseCase(title = "Title $it", content = "Content: $it")
+        viewModelScope.launch {// suspend функции можно запускать только внутри скоупа
+            repeat(100) {
+                addNoteUseCase(title = "Title $it", content = "Content: $it")
+            }
         }
+
     }
 
     fun processCommand(command: NotesCommand) {
-        when (command) {
-            is NotesCommand.DeleteNote -> {
-                deleteNoteUseCase(command.noteId)
-            }
+        viewModelScope.launch {// suspend функции можно запускать только внутри скоупа
+            when (command) {
+                is NotesCommand.DeleteNote -> {
+                    deleteNoteUseCase(command.noteId)
+                }
 
-            is NotesCommand.EditNote -> {
-                val note: Note = getNoteUseCase(command.note.id)
-                val title = note.title
-                //editNoteUseCase(note.copy(title = title + "edited"))
-                editNoteUseCase(note.copy(title = title + "edited"))
-            }
+                is NotesCommand.EditNote -> {
+                    val note: Note = getNoteUseCase(command.note.id)
+                    val title = note.title
+                    editNoteUseCase(note.copy(title = title + "edited"))
+                }
 
-            is NotesCommand.InputSearchQuery -> {
-                query.update { command.query.trim() }//тут запрос будет отправлен в обьект Flow(query) стэйт экрана меняетя и компоуз перерисовывает экран
-            }
+                is NotesCommand.InputSearchQuery -> {
+                    query.update { command.query.trim() }//тут запрос будет отправлен в обьект Flow(query) стэйт экрана меняетя и компоуз перерисовывает экран
+                }
 
-            is NotesCommand.SwitchPinnedStatus -> {
-                switchPinnedStatusUseCase(command.noteId)
+                is NotesCommand.SwitchPinnedStatus -> {
+                    switchPinnedStatusUseCase(command.noteId)
+                }
             }
         }
+
     }
+
+//    override fun onCleared() {ViewModelScope автоматически отменяется
+//        super.onCleared()
+//        Log.d("ViewModel","onCleared")
+//        viewModelScope.cancel()//отменяем все запущенные корутины при уничтожении вьюмодели
+//    }
 
 }
 
