@@ -285,9 +285,9 @@ fun NoteCard(
             text = DateFormatter.formatDateToString(note.updatedAt),//вызываем класс из Utils
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            overflow = TextOverflow.Ellipsis
 
-        )
+
+            )
         Spacer(
             modifier = Modifier.height(24.dp)
         )
@@ -297,7 +297,8 @@ fun NoteCard(
             fontSize = 16.sp,
             maxLines = 3,// максимум три строки
             color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            overflow = TextOverflow.Ellipsis
 
         )
     }
