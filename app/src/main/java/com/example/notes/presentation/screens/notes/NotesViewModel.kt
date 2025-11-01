@@ -110,6 +110,8 @@ class NotesViewModel : ViewModel() {
 
     }
 
+
+
 //    override fun onCleared() {ViewModelScope автоматически отменяется
 //        super.onCleared()
 //        Log.d("ViewModel","onCleared")
@@ -118,7 +120,7 @@ class NotesViewModel : ViewModel() {
 
 }
 
-sealed interface NotesCommand {
+sealed interface NotesCommand {// эти  подклассы понятия не имеют что будет выполняться. Мы им логику навесим в ProcesCommand
     data class InputSearchQuery(val query: String) : NotesCommand
     data class SwitchPinnedStatus(val noteId: Int) : NotesCommand
 
@@ -133,3 +135,5 @@ data class NotesScreenState(
     val pinnedNotes: List<Note> = listOf(),
     val otherNotes: List<Note> = listOf()
 )
+
+

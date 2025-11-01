@@ -7,3 +7,4 @@ class GetAllNotesUseCase (private val repository: NotesRepository){
        return repository.getAllNotes()
     }
 }
+

@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onDestroy() {
+    override fun onDestroy() {//эта функция просто для логирования - при уничтожении активити логирует
         super.onDestroy()
         Log.d("MainActivity","onDestroy")
     }

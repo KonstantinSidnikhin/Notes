@@ -1,6 +1,6 @@
 package com.example.notes.presentation.screens.notes
 
-import android.R
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -15,38 +15,37 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ComposeCompilerApi
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notes.domain.Note
-import com.example.notes.presentation.ui.theme.Green
 import com.example.notes.presentation.ui.theme.OtherNotesColors
 import com.example.notes.presentation.ui.theme.PinnedNotesColors
-import com.example.notes.presentation.ui.theme.Yellow200
 import com.example.notes.presentation.utils.DateFormatter
-import org.w3c.dom.Text
-import kotlin.random.Random
+import com.example.notes.R
 
 @Composable
 fun NotesScreen(
@@ -58,107 +57,123 @@ fun NotesScreen(
     // с Compose)записываем StateFlow из вьюмодели.
     //val currentState: NotesScreenState = state.value// с делегатом уже не нужно value
     // val scrollState = remember { ScrollState(0) }
-
-    LazyColumn(
-        modifier = modifier
-            .padding(
-                top = 48.dp,
-            ),
-        //.verticalScroll(rememberScrollState()),\\в лэйзи колум уже под капотом есть скрол стэйт
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item {
-
-            Title(
-                modifier = Modifier.padding(horizontal = 24.dp),
-                text = "All notes",
-
-                )
-        }
-        item {
-            SearchBar(
-                modifier = Modifier.padding(horizontal = 24.dp),
-                query = state.query,
-                onQueryChange = {//в описании функции (в низу)мы просто сделали пустышку а тут описали функционал
-                    viewModel.processCommand(NotesCommand.InputSearchQuery(it))//тут меняют в стэйте экрана параметр query
-                    // и экран перерисовывает заметки содержащие строку == query в контенте или тайтле
-                }
-            )
-        }
-        item {
-
-            Subtitle(
-                modifier = Modifier.padding(horizontal = 24.dp),
-                text = "Pinned"
-            )
-
-        }
-
-        item {
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-//                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 24.dp)
+    Scaffold(
+        modifier = modifier,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {},
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                containerColor = MaterialTheme.colorScheme.primary,
+                shape = CircleShape
             ) {
-                //items(state.pinnedNotes, key = { it.id }) { note ->
-                itemsIndexed(
-                    state.pinnedNotes,
-                    key = { index, note -> note.id }) { index, note ->
-                    NoteCard(
-                        modifier = Modifier.widthIn(max = 160.dp),// ограничили количество знаков внутри заметки
-                        note = note,//тут первая note это поле в композ функции , а вторую ноут мы подставляем  как наш элемент
-                        onNoteClick = {
-                            viewModel.processCommand(NotesCommand.EditNote(it))
-                        },
-                        onDoubleClick = {
-                            viewModel.processCommand(NotesCommand.DeleteNote(note.id))
-                        },
-                        onLongClick = {
-                            viewModel.processCommand(NotesCommand.SwitchPinnedStatus(note.id))
-                        },
-                        backgroundColor = PinnedNotesColors[index % PinnedNotesColors.size]
-                    )
-                }
+                Icon(
 
+                       painter = painterResource(R.drawable.ic_add_note),
+                   // imageVector = Icons.Default.Add,
+                    contentDescription = "button add"
+                )
             }
         }
+    ) { innerPadding ->
+        LazyColumn(
+            contentPadding = innerPadding,
+            //.verticalScroll(rememberScrollState()),\\в лэйзи колум уже под капотом есть скрол стэйт
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+
+                Title(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    text = "All notes",
+
+                    )
+            }
+            item {
+                SearchBar(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    query = state.query,
+                    onQueryChange = {//в описании функции (в низу)мы просто сделали пустышку а тут описали функционал
+                        viewModel.processCommand(NotesCommand.InputSearchQuery(it))//тут меняют в стэйте экрана параметр query
+                        // и экран перерисовывает заметки содержащие строку == query в контенте или тайтле
+                    }
+                )
+            }
+            item {
+
+                Subtitle(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    text = "Pinned"
+                )
+
+            }
+
+            item {
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+//                    .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp)
+                ) {
+                    //items(state.pinnedNotes, key = { it.id }) { note ->
+                    itemsIndexed(
+                        state.pinnedNotes,
+                        key = { index, note -> note.id }) { index, note ->
+                        NoteCard(
+                            modifier = Modifier.widthIn(max = 160.dp),// ограничили количество знаков внутри заметки
+                            note = note,//тут первая note это поле в композ функции , а вторую ноут мы подставляем  как наш элемент
+                            onNoteClick = {
+                                viewModel.processCommand(NotesCommand.EditNote(it))
+                            },
+                            onDoubleClick = {
+                                viewModel.processCommand(NotesCommand.DeleteNote(note.id))
+                            },
+                            onLongClick = {
+                                viewModel.processCommand(NotesCommand.SwitchPinnedStatus(note.id))
+                            },
+                            backgroundColor = PinnedNotesColors[index % PinnedNotesColors.size]
+                        )
+                    }
+
+                }
+            }
 
 
-        item {
+            item {
 
-            Subtitle(
-                modifier = Modifier.padding(24.dp),
-                text = "Others"
-            )
+                Subtitle(
+                    modifier = Modifier.padding(24.dp),
+                    text = "Others"
+                )
+            }
+            itemsIndexed(
+                items = state.otherNotes,
+                key = { index, item -> item.id }//привязываем ключ айтема в ui compose к заметке Note/ если заметок стало меньше, то айтемов тоже меньше
+            ) { index, note: Note ->// тут можно _, note:Note ->
+                NoteCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    note = note,
+                    onNoteClick = {
+                        viewModel.processCommand(NotesCommand.EditNote(it))//тут у заметки по которой кликнули будет меняться updatedAt и title edited а так как она в стэйте экрана компоуз перерисует ее
+                    },
+                    onDoubleClick = {
+                        viewModel.processCommand(NotesCommand.DeleteNote(note.id))
+                    },
+                    onLongClick = {
+                        viewModel.processCommand(NotesCommand.SwitchPinnedStatus(note.id))
+                    },
+
+                    backgroundColor = OtherNotesColors[index % OtherNotesColors.size]
+                )
+            }
+
+
         }
-        itemsIndexed(
-            items = state.otherNotes,
-            key = { index, item -> item.id }//привязываем ключ айтема в ui compose к заметке Note/ если заметок стало меньше, то айтемов тоже меньше
-        ) { index, note: Note ->// тут можно _, note:Note ->
-            NoteCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                note = note,
-                onNoteClick = {
-                    viewModel.processCommand(NotesCommand.EditNote(it))
-                },
-                onDoubleClick = {
-                    viewModel.processCommand(NotesCommand.DeleteNote(note.id))
-                },
-                onLongClick = {
-                    viewModel.processCommand(NotesCommand.SwitchPinnedStatus(note.id))
-                },
-
-                backgroundColor = OtherNotesColors[index % OtherNotesColors.size]
-            )
-        }
-
-
     }
+
 }
 
 @Composable
@@ -282,7 +297,7 @@ fun NoteCard(
         )
         Text(
 
-            text = DateFormatter.formatDateToString(note.updatedAt),//вызываем класс из Utils
+            text = DateFormatter.formatDateToString(note.updatedAt),//вызываем класс из Utils единственное место где мы его invoke
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
 

@@ -49,21 +49,22 @@ object TestNotesRepositoryImpl : NotesRepository {
     }
 
 
+//    override suspend fun deleteNote(noteId: Int) {
+//        notesListFlow.update { oldList ->
+//            oldList.toMutableList().apply {
+//                removeIf { it.id == noteId }
+//            }
+//        }
+//
+//    }
+
     override suspend fun deleteNote(noteId: Int) {
         notesListFlow.update { oldList ->
-            oldList.toMutableList().apply {
-                removeIf { it.id == noteId }
-            }
+            oldList.filterNot { it.id == noteId }
         }
-
     }
 
-    //    override fun deleteNote(noteId:Int){
-//        notesListFlow.update { oldList->
-//            oldList.filterNot { it.id == noteId }
-//        }
-//    }
-//
+
     override suspend fun editNote(note: Note) {
         notesListFlow.update { oldList ->
             oldList.map {
@@ -78,6 +79,7 @@ object TestNotesRepositoryImpl : NotesRepository {
     }
 
 
+
     override fun getAllNotes(): Flow<List<Note>> {
         return notesListFlow.asStateFlow()
     }
@@ -85,6 +87,7 @@ object TestNotesRepositoryImpl : NotesRepository {
     override suspend fun getNote(noteId: Int): Note {
         return notesListFlow.value.first { it.id == noteId }
     }
+
 
     override fun searchNotes(query: String): Flow<List<Note>> {
         return notesListFlow.map { currentList ->

@@ -7,17 +7,18 @@ import java.util.concurrent.TimeUnit
 object DateFormatter {
     private val millisInHour = TimeUnit.HOURS.toMillis(1)
     private val millisInDay = TimeUnit.DAYS.toMillis(1)
-    private val formatter =   SimpleDateFormat.getDateInstance(DateFormat.SHORT)
+    private val formatter = SimpleDateFormat.getDateInstance(DateFormat.SHORT)
 
-    fun formatDateToString(timestamp: Long): String{
+    fun formatDateToString(timestamp: Long): String {
         val now = System.currentTimeMillis()
         val diff = now - timestamp
-        return when{
+        return when {
             diff < millisInHour -> "Just now"
             diff < millisInDay -> {
-                val hours = TimeUnit.MICROSECONDS.toHours(diff)
+                val hours = TimeUnit.MILLISECONDS.toHours(diff)
                 "$hours h ago"
             }
+
             else -> {
 
                 formatter.format(timestamp)
