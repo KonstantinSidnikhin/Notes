@@ -50,7 +50,9 @@ import com.example.notes.R
 @Composable
 fun NotesScreen(
     modifier: Modifier = Modifier,
-    viewModel: NotesViewModel = viewModel()
+    viewModel: NotesViewModel = viewModel(),
+    onNoteClick: (Note) -> Unit,
+    onAddNoteClick:()-> Unit
 ) {
     // val state: State<NotesScreenState> = viewModel.state.collectAsState()// без делегата
     val state: NotesScreenState by viewModel.state.collectAsState()// В переменную типа State(работает
@@ -61,7 +63,7 @@ fun NotesScreen(
         modifier = modifier,
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {},
+                onClick = onAddNoteClick,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 containerColor = MaterialTheme.colorScheme.primary,
                 shape = CircleShape
@@ -123,12 +125,13 @@ fun NotesScreen(
                         NoteCard(
                             modifier = Modifier.widthIn(max = 160.dp),// ограничили количество знаков внутри заметки
                             note = note,//тут первая note это поле в композ функции , а вторую ноут мы подставляем  как наш элемент
-                            onNoteClick = {
-                                viewModel.processCommand(NotesCommand.EditNote(it))
-                            },
-                            onDoubleClick = {
-                                viewModel.processCommand(NotesCommand.DeleteNote(note.id))
-                            },
+//                            onNoteClick = {
+//                                viewModel.processCommand(NotesCommand.EditNote(it))
+//                            },
+                            onNoteClick = onNoteClick, //передаем колбэк который в модифаере
+                          //  onDoubleClick = {
+                             //   viewModel.processCommand(NotesCommand.DeleteNote(note.id))
+                         //  },
                             onLongClick = {
                                 viewModel.processCommand(NotesCommand.SwitchPinnedStatus(note.id))
                             },
@@ -156,15 +159,17 @@ fun NotesScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp),
                     note = note,
-                    onNoteClick = {
-                        viewModel.processCommand(NotesCommand.EditNote(it))//тут у заметки по которой кликнули будет меняться updatedAt и title edited а так как она в стэйте экрана компоуз перерисует ее
-                    },
-                    onDoubleClick = {
-                        viewModel.processCommand(NotesCommand.DeleteNote(note.id))
-                    },
+                    onNoteClick = onNoteClick,//Где у нас реализация второго онКлик? - В мэйн активити сейчас. Там логирование
+                   // onNoteClick = {
+                   //     viewModel.processCommand(NotesCommand.EditNote(it))//тут у заметки по которой кликнули будет меняться updatedAt и title edited а так как она в стэйте экрана компоуз перерисует ее
+                   // },
+                   // onDoubleClick = {
+                   //     viewModel.processCommand(NotesCommand.DeleteNote(note.id))
+                   // },
                     onLongClick = {
                         viewModel.processCommand(NotesCommand.SwitchPinnedStatus(note.id))
                     },
+
 
                     backgroundColor = OtherNotesColors[index % OtherNotesColors.size]
                 )
@@ -264,7 +269,7 @@ fun NoteCard(
     backgroundColor: Color,
     onNoteClick: (Note) -> Unit,
     onLongClick: (Note) -> Unit,
-    onDoubleClick: (Note) -> Unit
+   // onDoubleClick: (Note) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -277,9 +282,9 @@ fun NoteCard(
                 onLongClick = {
                     onLongClick(note)
                 },
-                onDoubleClick = {
-                    onDoubleClick(note)
-                }
+              //  onDoubleClick = {
+                //    onDoubleClick(note)
+                //}
 
             )
             .padding(16.dp)

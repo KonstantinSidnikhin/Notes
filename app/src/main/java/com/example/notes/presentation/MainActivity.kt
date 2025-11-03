@@ -21,14 +21,18 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NotesTheme {
-                NotesScreen()
+                NotesScreen(
+                    onNoteClick = {
+                        Log.d("MainActivity","onNoteClick: $it")
+                    },
+                    onAddNoteClick = {
+                        Log.d("MainActivity","onAddNoteClick")
+                    }
+                )
+
             }
         }
     }
 
-    override fun onDestroy() {//эта функция просто для логирования - при уничтожении активити логирует
-        super.onDestroy()
-        Log.d("MainActivity","onDestroy")
-    }
 }
 

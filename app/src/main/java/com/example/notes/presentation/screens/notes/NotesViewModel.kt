@@ -29,24 +29,23 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalCoroutinesApi::class)
 class NotesViewModel : ViewModel() {
     private val repository = TestNotesRepositoryImpl
-    private val addNoteUseCase = AddNoteUseCase(repository)
-    private val editNoteUseCase = EditNoteUseCase(repository)
-    private val deleteNoteUseCase = DeleteNoteUseCase(repository)
+   // private val addNoteUseCase = AddNoteUseCase(repository)
+    //private val editNoteUseCase = EditNoteUseCase(repository)
+    //private val deleteNoteUseCase = DeleteNoteUseCase(repository)
     private val getAllNotesUseCase = GetAllNotesUseCase(repository)
     private val getNoteUseCase = GetNoteUseCase(repository)
     private val searchNotesUseCase = SearchNotesUseCase(repository)
     private val switchPinnedStatusUseCase = SwitchPinnedStatusUseCase(repository)
     private val query: MutableStateFlow<String> =
         MutableStateFlow("")
-
     private val _state: MutableStateFlow<NotesScreenState> =
         MutableStateFlow(NotesScreenState())//это коробка со стэйтФлоу экрана. в нем три поля query pinnedNotes otherNotes
 
     val state = _state.asStateFlow()//становится неизменяемым
-        //private val scope = CoroutineScope(Dispatchers.IO)// под капотом назначена viewModelScope
+    //private val scope = CoroutineScope(Dispatchers.IO)// под капотом назначена viewModelScope
 
     init {
-        addSomeNotes()
+        //addSomeNotes()
         query//1 это объект флоу и мы подписываемся на него при создании вьюмодели (это строка) она появляется только когда мы что то пишем в поле поиска
             .onEach { input: String ->//На каждый символ(это значение введенное пользователем
                 _state.update { it.copy(query = input) }//обновляем стейт делая  копию текущего стэйта
@@ -71,32 +70,27 @@ class NotesViewModel : ViewModel() {
                 _state.update { it.copy(pinnedNotes = pinnedNotes, otherNotes = otherNotes) }
             }
             .launchIn(viewModelScope)//3 Подписываемся на этот поток
-
-
     }
 
-
-    private fun addSomeNotes() {
-        viewModelScope.launch {// suspend функции можно запускать только внутри скоупа
-            repeat(100) {
-                addNoteUseCase(title = "Title $it", content = "Content: $it")
-            }
-        }
-
-    }
-
+    //    private fun addSomeNotes() {
+//        viewModelScope.launch {// suspend функции можно запускать только внутри скоупа
+//            repeat(100) {
+//                addNoteUseCase(title = "Title $it", content = "Content: $it")
+//            }
+//        }
+//    }
     fun processCommand(command: NotesCommand) {
         viewModelScope.launch {// suspend функции можно запускать только внутри скоупа
             when (command) {
-                is NotesCommand.DeleteNote -> {
-                    deleteNoteUseCase(command.noteId)
-                }
-
-                is NotesCommand.EditNote -> {
-                    val note: Note = getNoteUseCase(command.note.id)
-                    val title = note.title
-                    editNoteUseCase(note.copy(title = title + "edited"))
-                }
+//                is NotesCommand.DeleteNote -> {
+//                    deleteNoteUseCase(command.noteId)
+//                }
+//
+//                is NotesCommand.EditNote -> {
+//                    val note: Note = getNoteUseCase(command.note.id)
+//                    val title = note.title
+//                    editNoteUseCase(note.copy(title = title + "edited"))
+//                }
 
                 is NotesCommand.InputSearchQuery -> {
                     query.update { command.query.trim() }//тут запрос будет отправлен в обьект Flow(query) стэйт экрана меняетя и компоуз перерисовывает экран
@@ -109,26 +103,17 @@ class NotesViewModel : ViewModel() {
         }
 
     }
-
-
-
-//    override fun onCleared() {ViewModelScope автоматически отменяется
-//        super.onCleared()
-//        Log.d("ViewModel","onCleared")
-//        viewModelScope.cancel()//отменяем все запущенные корутины при уничтожении вьюмодели
-//    }
-
 }
 
-sealed interface NotesCommand {// эти  подклассы понятия не имеют что будет выполняться. Мы им логику навесим в ProcesCommand
+sealed interface NotesCommand {
+    // эти  подклассы понятия не имеют что будет выполняться. Мы им логику навесим в ProcesCommand
     data class InputSearchQuery(val query: String) : NotesCommand
     data class SwitchPinnedStatus(val noteId: Int) : NotesCommand
 
     //temp
-    data class DeleteNote(val noteId: Int) : NotesCommand
-    data class EditNote(val note: Note) : NotesCommand
+//    data class DeleteNote(val noteId: Int) : NotesCommand
+//    data class EditNote(val note: Note) : NotesCommand
 }
-
 
 data class NotesScreenState(
     val query: String = "",
