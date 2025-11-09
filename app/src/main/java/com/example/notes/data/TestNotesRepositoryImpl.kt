@@ -2,6 +2,7 @@ package com.example.notes.data
 
 import com.example.notes.domain.Note
 import com.example.notes.domain.NotesRepository
+import com.example.notes.presentation.utils.DateFormatter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +30,7 @@ object TestNotesRepositoryImpl : NotesRepository {
     //  }
     // }
 
-    override suspend fun addNote(
+        override suspend fun addNote(
         title: String,
         content: String,
         isPinned: Boolean,//теперь у нас isPinned определяется в домэйн слое
@@ -47,6 +48,7 @@ object TestNotesRepositoryImpl : NotesRepository {
             oldList + note
         }
     }
+
 
 
 //    override suspend fun deleteNote(noteId: Int) {
@@ -77,7 +79,6 @@ object TestNotesRepositoryImpl : NotesRepository {
             }
         }
     }
-
 
 
     override fun getAllNotes(): Flow<List<Note>> {

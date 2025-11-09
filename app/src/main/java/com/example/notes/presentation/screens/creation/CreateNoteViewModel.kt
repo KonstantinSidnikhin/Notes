@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notes.data.TestNotesRepositoryImpl
 import com.example.notes.domain.AddNoteUseCase
+import com.example.notes.presentation.screens.creation.CreateNoteState.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -17,14 +18,14 @@ class CreateNoteViewModel : ViewModel() {
     // в угловых скобках надо параметризировать что бы дать возможность и для Finished
     val state = _state.asStateFlow()
 
-        fun processCommand(command: CreateNoteCommand) {
+    fun processCommand(command: CreateNoteCommand) {
         when (command) {
             CreateNoteCommand.Back -> {
 
                 _state.update { CreateNoteState.Finished }
             }
 
-            is CreateNoteCommand.InputContent -> {
+            is CreateNoteCommand.InputContent -> {//это если мы уже в состоянии Creation и начали например заполнять тайтл или контент
                 _state.update { previousState ->
                     if (previousState is CreateNoteState.Creation) {
                         previousState.copy(
@@ -32,7 +33,7 @@ class CreateNoteViewModel : ViewModel() {
                             isSaveEnabled = previousState.title.isNotBlank() && command.content.isNotBlank()
                         )
                     } else {
-                        CreateNoteState.Creation(content = command.content)
+                        CreateNoteState.Creation(content = command.content)//а тут мы вроде как в Creation только попали, нам нечего сохранять, поэтому и copy не делаем. у нас ведь текущий стэйт не Creation
                     }
 
                 }
@@ -69,24 +70,24 @@ class CreateNoteViewModel : ViewModel() {
         }
     }
 
-    }
+}
+
+sealed interface CreateNoteCommand {
+    data class InputTitle(val title: String) : CreateNoteCommand
+    data class InputContent(val content: String) : CreateNoteCommand
+    data object Save : CreateNoteCommand
+    data object Back : CreateNoteCommand
+
+}
 
 
-    sealed interface CreateNoteCommand {
-        data class InputTitle(val title: String) : CreateNoteCommand
-        data class InputContent(val content: String) : CreateNoteCommand
-        data object Save : CreateNoteCommand
-        data object Back : CreateNoteCommand
+sealed interface CreateNoteState {
+    data class Creation(
+        val title: String = "",
+        val content: String = "",
+        val isSaveEnabled: Boolean = false
+    ) : CreateNoteState
 
-    }
+    data object Finished : CreateNoteState
 
-    sealed interface CreateNoteState {
-        data class Creation(
-            val title: String = "",
-            val content: String = "",
-            val isSaveEnabled: Boolean = false
-        ) : CreateNoteState
-
-        data object Finished : CreateNoteState
-
-    }
+}

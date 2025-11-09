@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.notes.presentation.screens.creation.CreateNoteScreen
 import com.example.notes.presentation.screens.notes.NotesScreen
 import com.example.notes.presentation.ui.theme.NotesTheme
 
@@ -21,14 +22,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NotesTheme {
-                NotesScreen(
-                    onNoteClick = {
-                        Log.d("MainActivity","onNoteClick: $it")
-                    },
-                    onAddNoteClick = {
-                        Log.d("MainActivity","onAddNoteClick")
-                    }
-                )
+                CreateNoteScreen()
+//                NotesScreen(
+//                    onNoteClick1 = {// в функции NotesScreen у нас был плэйс холдер для коллбэка, вот тут мы реализуем его.
+//                        Log.d("MainActivity","onNoteClick: $it")
+//                    },
+//                    onAddNoteClick = {
+//                        Log.d("MainActivity","onAddNoteClick")
+//                    }
+//                )
+
 
             }
         }

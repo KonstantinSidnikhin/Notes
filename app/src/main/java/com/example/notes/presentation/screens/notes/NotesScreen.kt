@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -47,12 +48,13 @@ import com.example.notes.presentation.ui.theme.PinnedNotesColors
 import com.example.notes.presentation.utils.DateFormatter
 import com.example.notes.R
 
+
 @Composable
 fun NotesScreen(
     modifier: Modifier = Modifier,
     viewModel: NotesViewModel = viewModel(),
-    onNoteClick: (Note) -> Unit,
-    onAddNoteClick:()-> Unit
+    onNoteClick1: (Note) -> Unit,// плэйсхолдер для коллбэка который мы подставим в дальнейшем какую то функцию
+    onAddNoteClick: () -> Unit
 ) {
     // val state: State<NotesScreenState> = viewModel.state.collectAsState()// без делегата
     val state: NotesScreenState by viewModel.state.collectAsState()// В переменную типа State(работает
@@ -70,12 +72,13 @@ fun NotesScreen(
             ) {
                 Icon(
 
-                       painter = painterResource(R.drawable.ic_add_note),
-                   // imageVector = Icons.Default.Add,
+                    painter = painterResource(R.drawable.ic_add_note),
+                    // imageVector = Icons.Default.Add,
                     contentDescription = "button add"
                 )
             }
         }
+
     ) { innerPadding ->
         LazyColumn(
             contentPadding = innerPadding,
@@ -118,7 +121,7 @@ fun NotesScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(horizontal = 24.dp)
                 ) {
-                    //items(state.pinnedNotes, key = { it.id }) { note ->
+                    //items(state.pinnedNotes, key = { it.id }) { note ->// Это не нужно
                     itemsIndexed(
                         state.pinnedNotes,
                         key = { index, note -> note.id }) { index, note ->
@@ -128,10 +131,10 @@ fun NotesScreen(
 //                            onNoteClick = {
 //                                viewModel.processCommand(NotesCommand.EditNote(it))
 //                            },
-                            onNoteClick = onNoteClick, //передаем колбэк который в модифаере
-                          //  onDoubleClick = {
-                             //   viewModel.processCommand(NotesCommand.DeleteNote(note.id))
-                         //  },
+                            onNoteClick = onNoteClick1, //передаем колбэк который в модифаере. Там мы сделали плэйсхолдер, его логику мы определим далее, например в мэйн активити мы сделали логирование
+                            //  onDoubleClick = {
+                            //   viewModel.processCommand(NotesCommand.DeleteNote(note.id))
+                            //  },
                             onLongClick = {
                                 viewModel.processCommand(NotesCommand.SwitchPinnedStatus(note.id))
                             },
@@ -141,6 +144,7 @@ fun NotesScreen(
 
                 }
             }
+
 
 
             item {
@@ -159,13 +163,13 @@ fun NotesScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp),
                     note = note,
-                    onNoteClick = onNoteClick,//Где у нас реализация второго онКлик? - В мэйн активити сейчас. Там логирование
-                   // onNoteClick = {
-                   //     viewModel.processCommand(NotesCommand.EditNote(it))//тут у заметки по которой кликнули будет меняться updatedAt и title edited а так как она в стэйте экрана компоуз перерисует ее
-                   // },
-                   // onDoubleClick = {
-                   //     viewModel.processCommand(NotesCommand.DeleteNote(note.id))
-                   // },
+                    onNoteClick = onNoteClick1,//Где у нас реализация второго онКлик? - В мэйн активити сейчас. Там логирование
+                    // onNoteClick = {
+                    //     viewModel.processCommand(NotesCommand.EditNote(it))//тут у заметки по которой кликнули будет меняться updatedAt и title edited а так как она в стэйте экрана компоуз перерисует ее
+                    // },
+                    // onDoubleClick = {
+                    //     viewModel.processCommand(NotesCommand.DeleteNote(note.id))
+                    // },
                     onLongClick = {
                         viewModel.processCommand(NotesCommand.SwitchPinnedStatus(note.id))
                     },
@@ -248,6 +252,7 @@ private fun SearchBar(
 }
 
 
+
 @Composable
 private fun Subtitle(
     modifier: Modifier = Modifier,
@@ -267,9 +272,9 @@ fun NoteCard(
     modifier: Modifier = Modifier,
     note: Note,
     backgroundColor: Color,
-    onNoteClick: (Note) -> Unit,
+    onNoteClick: (Note) -> Unit,// это плэйс холдер. мы вдальнейшем туда подставим значение. Напри
     onLongClick: (Note) -> Unit,
-   // onDoubleClick: (Note) -> Unit
+    // onDoubleClick: (Note) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -282,7 +287,7 @@ fun NoteCard(
                 onLongClick = {
                     onLongClick(note)
                 },
-              //  onDoubleClick = {
+                //  onDoubleClick = {
                 //    onDoubleClick(note)
                 //}
 
