@@ -29,7 +29,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalCoroutinesApi::class)
 class NotesViewModel : ViewModel() {
     private val repository = TestNotesRepositoryImpl
-   // private val addNoteUseCase = AddNoteUseCase(repository)
+
+    // private val addNoteUseCase = AddNoteUseCase(repository)
     //private val editNoteUseCase = EditNoteUseCase(repository)
     //private val deleteNoteUseCase = DeleteNoteUseCase(repository)
     private val getAllNotesUseCase = GetAllNotesUseCase(repository)
@@ -44,20 +45,19 @@ class NotesViewModel : ViewModel() {
     val state = _state.asStateFlow()//становится неизменяемым
     //private val scope = CoroutineScope(Dispatchers.IO)// под капотом назначена viewModelScope
 
-    init {
+        init {
         //addSomeNotes()
         query//1 это объект флоу и мы подписываемся на него при создании вьюмодели (это строка) она появляется только когда мы что то пишем в поле поиска
-            .onEach { input: String ->//На каждый символ(это значение введенное пользователем
-                _state.update { it.copy(query = input) }//обновляем стейт делая  копию текущего стэйта
-                // в котором изменим свойства query
+            .onEach { input: String ->
+                _state.update { it.copy(query = input) }
+
             }
             .flatMapLatest {//этот метод при изменении объекта флоу отменит старые подписки и подпишется на новый Flow
                     input: String ->
                 if (input.isBlank()) {
-                    getAllNotesUseCase()//2 тут мы переключаемся на этот поток данных и работаем с ним
-                    // в блоке onEach
+                    getAllNotesUseCase()
                 } else {
-                    searchNotesUseCase(input)//or this thread
+                    searchNotesUseCase(input)
                 }
             }
             // тут очень важно что передается в следующий блок результат  searchNotesUseCase-  Flow<List<Note>>
@@ -71,6 +71,8 @@ class NotesViewModel : ViewModel() {
             }
             .launchIn(viewModelScope)//3 Подписываемся на этот поток
     }
+
+
 
     //    private fun addSomeNotes() {
 //        viewModelScope.launch {// suspend функции можно запускать только внутри скоупа

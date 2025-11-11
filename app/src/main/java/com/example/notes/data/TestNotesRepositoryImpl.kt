@@ -12,7 +12,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
 object TestNotesRepositoryImpl : NotesRepository {
-    private val notesListFlow = MutableStateFlow<List<Note>>(listOf())
+    private val testData = mutableListOf<Note>().apply {
+        repeat(10){
+            add(Note(it,"Title: $it", "Content: $it", System.currentTimeMillis(),false))
+        }
+    }
+    private val notesListFlow = MutableStateFlow<List<Note>>(testData)
     // override fun addNote(note: Note) {
     // val newNotes = notesListFlow.value.toMutableList()
     // newNotes.add(note)
@@ -81,6 +86,7 @@ object TestNotesRepositoryImpl : NotesRepository {
     }
 
 
+
     override fun getAllNotes(): Flow<List<Note>> {
         return notesListFlow.asStateFlow()
     }
@@ -97,7 +103,6 @@ object TestNotesRepositoryImpl : NotesRepository {
         }
 
     }
-
 
     override suspend fun switchPinnedStatus(noteId: Int) {
         notesListFlow.update { oldList ->

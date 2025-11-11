@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notes.data.TestNotesRepositoryImpl
 import com.example.notes.domain.AddNoteUseCase
-import com.example.notes.presentation.screens.creation.CreateNoteState.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -27,13 +26,13 @@ class CreateNoteViewModel : ViewModel() {
 
             is CreateNoteCommand.InputContent -> {//это если мы уже в состоянии Creation и начали например заполнять тайтл или контент
                 _state.update { previousState ->
-                    if (previousState is CreateNoteState.Creation) {
+                    if (previousState is CreateNoteState.Creation) {//если мы в состоянии Creation
                         previousState.copy(
                             content = command.content,
                             isSaveEnabled = previousState.title.isNotBlank() && command.content.isNotBlank()
                         )
                     } else {
-                        CreateNoteState.Creation(content = command.content)//а тут мы вроде как в Creation только попали, нам нечего сохранять, поэтому и copy не делаем. у нас ведь текущий стэйт не Creation
+                        CreateNoteState.Creation(content = command.content)//а тут вызываем состояние Creation и просто назначаем полю контент значение из command
                     }
 
                 }
@@ -69,6 +68,7 @@ class CreateNoteViewModel : ViewModel() {
             }
         }
     }
+
 
 }
 

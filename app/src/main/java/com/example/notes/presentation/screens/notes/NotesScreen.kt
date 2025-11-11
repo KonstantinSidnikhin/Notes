@@ -78,8 +78,9 @@ fun NotesScreen(
                 )
             }
         }
+    )
 
-    ) { innerPadding ->
+   { innerPadding ->
         LazyColumn(
             contentPadding = innerPadding,
             //.verticalScroll(rememberScrollState()),\\в лэйзи колум уже под капотом есть скрол стэйт
@@ -144,6 +145,7 @@ fun NotesScreen(
 
                 }
             }
+
 
 
 
@@ -250,7 +252,6 @@ private fun SearchBar(
 
     )
 }
-
 
 
 @Composable
