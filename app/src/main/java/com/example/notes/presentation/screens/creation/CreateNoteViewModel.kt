@@ -27,12 +27,12 @@ class CreateNoteViewModel : ViewModel() {
             is CreateNoteCommand.InputContent -> {//это если мы уже в состоянии Creation и начали например заполнять тайтл или контент
                 _state.update { previousState ->
                     if (previousState is CreateNoteState.Creation) {//если мы в состоянии Creation
-                        previousState.copy(
+                        previousState.copy(// копируем для сохранения тайтла, если он есть
                             content = command.content,
                             isSaveEnabled = previousState.title.isNotBlank() && command.content.isNotBlank()
                         )
                     } else {
-                        CreateNoteState.Creation(content = command.content)//а тут вызываем состояние Creation и просто назначаем полю контент значение из command
+                        CreateNoteState.Creation(content = command.content)//а тут вызываем состояние Creation в первый раз поэтому copy не надо делать, там стэйта нет и просто назначаем полю контент значение из command
                     }
 
                 }
@@ -58,7 +58,7 @@ class CreateNoteViewModel : ViewModel() {
                         if (previousState is CreateNoteState.Creation) {
                             val title = previousState.title
                             val content = previousState.content
-                            addNoteUseCase(title, content)
+                            addNoteUseCase(title, content)//не забыть добавить заметку
                             CreateNoteState.Finished// мы создали заметку и все, и должны перейти на другой экран
                         } else {
                             previousState
@@ -81,6 +81,7 @@ sealed interface CreateNoteCommand {
 }
 
 
+
 sealed interface CreateNoteState {
     data class Creation(
         val title: String = "",
@@ -91,3 +92,4 @@ sealed interface CreateNoteState {
     data object Finished : CreateNoteState
 
 }
+

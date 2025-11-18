@@ -57,13 +57,13 @@ fun CreateNoteScreen(
                             )
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.Transparent,
+                            containerColor = Color.Green,
                             navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                         ),
                         navigationIcon = {
                             Icon(
                                 modifier = Modifier
-                                    .padding(start = 16.dp, end = 8.dp)
+                                    .padding(start = 16.dp, end = 80.dp)
                                     .clickable {
                                         viewModel.processCommand(CreateNoteCommand.Back)
                                     },

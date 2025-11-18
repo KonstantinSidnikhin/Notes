@@ -47,10 +47,14 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
+
+    implementation ("androidx.navigation:navigation-compose:2.9.6")
+
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.ui)
+    implementation(libs.ui.graphics)
     testImplementation(libs.junit)
 
 
