@@ -31,7 +31,7 @@ fun NavGraph() {
         composable(Screen.CreateNote.route) {
             CreateNoteScreen(
                 onFinished = {
-                    navController.navigate(Screen.Notes.route)
+                    navController.popBackStack()
                 }
             )
         }
@@ -39,7 +39,7 @@ fun NavGraph() {
             EditNoteScreen(
                 noteId = 5,
                 onFinished = {
-                    navController.navigate(Screen.Notes.route)
+                    navController.popBackStack()
 
                 }
             )
