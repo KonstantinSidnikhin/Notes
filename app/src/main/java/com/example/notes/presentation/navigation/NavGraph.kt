@@ -1,5 +1,6 @@
 package com.example.notes.presentation.navigation
 
+import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,7 +21,8 @@ fun NavGraph() {
         composable(Screen.Notes.route) {
             NotesScreen(//тут заглавный экран
                 onNoteClick1 = {// в функции NotesScreen у нас был плэйс холдер для коллбэка, вот тут мы реализуем его.
-                    navController.navigate(Screen.EditNote.route)
+                    // navController.navigate(Screen.EditNote.route + "/${it.id}")
+                    navController.navigate(Screen.EditNote.createRoute(it.id))
 
                 },
                 onAddNoteClick = {
@@ -35,9 +37,12 @@ fun NavGraph() {
                 }
             )
         }
-        composable(Screen.EditNote.route) {
+        composable(Screen.EditNote.route) {// будет создан обьект NavBackStackEntry и в него
+            // установлен обьект Bundle к нему мы обращаемся через it
+            //val noteId = it.arguments?.getString("note_id")?.toInt() ?: 0
+            val noteId = Screen.EditNote.getNoteId(it.arguments)
             EditNoteScreen(
-                noteId = 5,
+                noteId = noteId,
                 onFinished = {
                     navController.popBackStack()
 
@@ -48,51 +53,18 @@ fun NavGraph() {
     }
 }
 
-@Composable
-fun CustomNavGraph() {
-    val screen = remember { mutableStateOf<CustomScreen>(CustomScreen.Notes) }
-    val currentScreen = screen.value
-    when (currentScreen) {
-        CustomScreen.CreateNote -> {
-            CreateNoteScreen(
-                onFinished = {
-                    screen.value = CustomScreen.Notes
-                }
-            )
-
-        }
-
-        is CustomScreen.EditNote -> {
-            EditNoteScreen(
-                noteId = currentScreen.noteId,
-                onFinished = {
-                    screen.value = CustomScreen.Notes// when finish we get back to main screen
-                }
-            )
-        }
-
-        CustomScreen.Notes -> {
-            NotesScreen(//тут заглавный экран
-                onNoteClick1 = {// в функции NotesScreen у нас был плэйс холдер для коллбэка, вот тут мы реализуем его.
-                    screen.value = CustomScreen.EditNote(it.id)
-                },
-                onAddNoteClick = {
-                    screen.value = CustomScreen.CreateNote
-                }
-            )
-        }
-    }
-
-}
 
 sealed class Screen(val route: String) {
     data object Notes : Screen("notes")
     data object CreateNote : Screen("create_note")
-    data object EditNote : Screen("edit_note")
+    data object EditNote : Screen("edit_note/{note_id}") { //Bundle("note_id" - "5")
+
+        fun createRoute(noteId: Int): String {//edit_note/5
+            return "edit_note/$noteId"
+        }
+        fun getNoteId(arguments: Bundle?):Int{
+            return arguments?.getString("note_id")?.toInt() ?: 0
+        }
+    }
 }
 
-sealed interface CustomScreen {
-    data object Notes : CustomScreen
-    data object CreateNote : CustomScreen
-    data class EditNote(val noteId: Int) : CustomScreen
-}

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
 object TestNotesRepositoryImpl : NotesRepository {
+    // here we use update to change the stateFlow for good. map is only for filtration
     private val testData = mutableListOf<Note>().apply {
         repeat(10){
             add(Note(it,"Title: $it", "Content: $it", System.currentTimeMillis(),false))

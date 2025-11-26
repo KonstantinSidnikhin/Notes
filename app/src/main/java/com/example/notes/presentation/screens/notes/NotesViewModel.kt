@@ -49,7 +49,7 @@ class NotesViewModel : ViewModel() {
         //addSomeNotes()
         query//1 это объект флоу и мы подписываемся на него при создании вьюмодели (это строка) она появляется только когда мы что то пишем в поле поиска
             .onEach { input: String ->
-                _state.update { it.copy(query = input) }
+                _state.update { it.copy(query = input) }//here query is mutableStateFlow and state is not the same - it's a different mutableStateFlow
 
             }
             .flatMapLatest {//этот метод при изменении объекта флоу отменит старые подписки и подпишется на новый Flow

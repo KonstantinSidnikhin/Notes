@@ -128,7 +128,7 @@ fun NotesScreen(
                         key = { index, note -> note.id }) { index, note ->
                         NoteCard(
                             modifier = Modifier.widthIn(max = 160.dp),// ограничили количество знаков внутри заметки
-                            note = note,//тут первая note это поле в композ функции , а вторую ноут мы подставляем  как наш элемент
+                            note = note,//тут первая note это поле в композ функции которую мы ниже создали , а вторую ноут мы подставляем  как наш элемент
 //                            onNoteClick = {
 //                                viewModel.processCommand(NotesCommand.EditNote(it))
 //                            },
@@ -190,7 +190,7 @@ fun NotesScreen(
 @Composable
 private fun Title(
     modifier: Modifier = Modifier,
-    text: String,//placeholder - сюда мы подставим значение при выхове функции
+    text: String,//placeholder - сюда мы подставим значение при вызове функции
 
 ) {
     Box(
@@ -252,6 +252,7 @@ private fun SearchBar(
 
     )
 }
+
 
 
 @Composable
