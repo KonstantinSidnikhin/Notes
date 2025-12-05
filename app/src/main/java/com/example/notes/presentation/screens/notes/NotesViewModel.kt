@@ -1,23 +1,14 @@
 package com.example.notes.presentation.screens.notes
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notes.data.TestNotesRepositoryImpl
-import com.example.notes.domain.AddNoteUseCase
-import com.example.notes.domain.DeleteNoteUseCase
-import com.example.notes.domain.EditNoteUseCase
 import com.example.notes.domain.GetAllNotesUseCase
 import com.example.notes.domain.GetNoteUseCase
 import com.example.notes.domain.Note
 import com.example.notes.domain.SearchNotesUseCase
 import com.example.notes.domain.SwitchPinnedStatusUseCase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -29,10 +20,6 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalCoroutinesApi::class)
 class NotesViewModel : ViewModel() {
     private val repository = TestNotesRepositoryImpl
-
-    // private val addNoteUseCase = AddNoteUseCase(repository)
-    //private val editNoteUseCase = EditNoteUseCase(repository)
-    //private val deleteNoteUseCase = DeleteNoteUseCase(repository)
     private val getAllNotesUseCase = GetAllNotesUseCase(repository)
     private val getNoteUseCase = GetNoteUseCase(repository)
     private val searchNotesUseCase = SearchNotesUseCase(repository)
@@ -45,7 +32,7 @@ class NotesViewModel : ViewModel() {
     val state = _state.asStateFlow()//становится неизменяемым
     //private val scope = CoroutineScope(Dispatchers.IO)// под капотом назначена viewModelScope
 
-        init {
+    init {
         //addSomeNotes()
         query//1 это объект флоу и мы подписываемся на него при создании вьюмодели (это строка) она появляется только когда мы что то пишем в поле поиска
             .onEach { input: String ->
@@ -72,27 +59,9 @@ class NotesViewModel : ViewModel() {
             .launchIn(viewModelScope)//3 Подписываемся на этот поток
     }
 
-
-
-    //    private fun addSomeNotes() {
-//        viewModelScope.launch {// suspend функции можно запускать только внутри скоупа
-//            repeat(100) {
-//                addNoteUseCase(title = "Title $it", content = "Content: $it")
-//            }
-//        }
-//    }
     fun processCommand(command: NotesCommand) {
         viewModelScope.launch {// suspend функции можно запускать только внутри скоупа
             when (command) {
-//                is NotesCommand.DeleteNote -> {
-//                    deleteNoteUseCase(command.noteId)
-//                }
-//
-//                is NotesCommand.EditNote -> {
-//                    val note: Note = getNoteUseCase(command.note.id)
-//                    val title = note.title
-//                    editNoteUseCase(note.copy(title = title + "edited"))
-//                }
 
                 is NotesCommand.InputSearchQuery -> {
                     query.update { command.query.trim() }//тут запрос будет отправлен в обьект Flow(query) стэйт экрана меняетя и компоуз перерисовывает экран
@@ -112,9 +81,6 @@ sealed interface NotesCommand {
     data class InputSearchQuery(val query: String) : NotesCommand
     data class SwitchPinnedStatus(val noteId: Int) : NotesCommand
 
-    //temp
-//    data class DeleteNote(val noteId: Int) : NotesCommand
-//    data class EditNote(val note: Note) : NotesCommand
 }
 
 data class NotesScreenState(

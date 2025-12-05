@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -38,7 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -53,7 +51,7 @@ import com.example.notes.R
 fun NotesScreen(
     modifier: Modifier = Modifier,
     viewModel: NotesViewModel = viewModel(),
-    onNoteClick1: (Note) -> Unit,// плэйсхолдер для коллбэка который мы подставим в дальнейшем какую то функцию
+    onNoteClick1: (Note) -> Unit,// плэйсхолдер для коллбэка который мы реализуем в навигации
     onAddNoteClick: () -> Unit
 ) {
     // val state: State<NotesScreenState> = viewModel.state.collectAsState()// без делегата
@@ -132,7 +130,7 @@ fun NotesScreen(
 //                            onNoteClick = {
 //                                viewModel.processCommand(NotesCommand.EditNote(it))
 //                            },
-                            onNoteClick = onNoteClick1, //передаем колбэк который в модифаере. Там мы сделали плэйсхолдер, его логику мы определим далее, например в мэйн активити мы сделали логирование
+                            onNoteClick = onNoteClick1, //передаем колбэк который в модифаере. Там мы сделали плэйсхолдер, его логику мы определим далее
                             //  onDoubleClick = {
                             //   viewModel.processCommand(NotesCommand.DeleteNote(note.id))
                             //  },
@@ -165,7 +163,7 @@ fun NotesScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp),
                     note = note,
-                    onNoteClick = onNoteClick1,//Где у нас реализация второго онКлик? - В мэйн активити сейчас. Там логирование
+                    onNoteClick = onNoteClick1,//
                     // onNoteClick = {
                     //     viewModel.processCommand(NotesCommand.EditNote(it))//тут у заметки по которой кликнули будет меняться updatedAt и title edited а так как она в стэйте экрана компоуз перерисует ее
                     // },

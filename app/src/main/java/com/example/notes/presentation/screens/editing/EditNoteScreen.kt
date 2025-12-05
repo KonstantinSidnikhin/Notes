@@ -41,11 +41,11 @@ import com.example.notes.presentation.utils.DateFormatter
 @Composable
 fun EditNoteScreen(
     modifier: Modifier = Modifier,
-    noteId:Int,// id of the note we pass with constructor
-    viewModel: EditNoteViewModel = viewModel{
-        EditNoteViewModel(noteId)//this way we make instance of viewmodel with parameter. cause we can't mace viewmodel(noteId)
+    noteId: Int,// id of the note we pass with constructor
+    viewModel: EditNoteViewModel = viewModel {
+        EditNoteViewModel(noteId)//this way we make instance of viewmodel with parameter. cause we can't make viewmodel(noteId)
     },
-    onFinished:()->Unit
+    onFinished: () -> Unit
 ) {
     val state = viewModel.state.collectAsState()
     val currentState = state.value
@@ -65,14 +65,17 @@ fun EditNoteScreen(
                             )
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.Transparent,
-                            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                            actionIconContentColor = MaterialTheme.colorScheme.onSurface
+                            // containerColor = Color.Transparent,
+                            containerColor = Color.Green,
+                            //navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                            navigationIconContentColor = Color.Red,
+                            //actionIconContentColor = MaterialTheme.colorScheme.onSurface,
+                            actionIconContentColor = Color.Blue
                         ),
                         actions = {
                             Icon(
                                 modifier = Modifier
-                                    .padding( end = 16.dp)
+                                    .padding(end = 16.dp)
                                     .clickable {
                                         viewModel.processCommand(EditNoteCommand.Delete)
                                     },
@@ -101,18 +104,20 @@ fun EditNoteScreen(
                             .padding(horizontal = 8.dp),
                         value = currentState.note.title,//slightly changed
                         onValueChange = {
-                            viewModel.processCommand(InputTitle(it))//срабатывают проверки заполнены ли другие поля и обновляется стэйт
+                            viewModel.processCommand(InputTitle(it))// мы передаем
+                            // то что ввели с клавы под видом it во вьюмодель и она там работает с вводом.Видимо обновляет стэйт.
                         },
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
+                            focusedContainerColor = Color.Red,
                             unfocusedContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Blue,
                             unfocusedIndicatorColor = Color.Transparent,
                         ),
                         textStyle = TextStyle(
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
+                            //color = Color.White
                         ),
                         placeholder = {
                             Text(
@@ -120,7 +125,8 @@ fun EditNoteScreen(
                                 text = "Title",
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface.copy(0.2f)
+                                //color = MaterialTheme.colorScheme.onSurface.copy(0.2f)
+                                color = Color.Cyan
                             )
                         }
                     )
@@ -171,7 +177,7 @@ fun EditNoteScreen(
                             containerColor = MaterialTheme.colorScheme.primary,
                             disabledContentColor = MaterialTheme.colorScheme.primary.copy(0.1f)
                         ),
-                         //contentColor = MaterialTheme.colorScheme.onSurface,
+                        //contentColor = MaterialTheme.colorScheme.onSurface,
                         // disabledContentColor = MaterialTheme.colorScheme.onSurface,
                     ) {
                         Text(
@@ -184,7 +190,7 @@ fun EditNoteScreen(
         }
 
         EditNoteState.Finished -> {
-            LaunchedEffect(key1 = Unit) {  onFinished()}// key already mentioned before
+            LaunchedEffect(key1 = Unit) { onFinished() }// key already mentioned before
 
         }
 
