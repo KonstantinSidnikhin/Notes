@@ -97,8 +97,9 @@ fun NotesScreen(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     query = state.query,
                     onQueryChange = {//в описании функции (в низу)мы просто сделали пустышку а тут описали функционал
-                        viewModel.processCommand(NotesCommand.InputSearchQuery(it))//тут меняют в стэйте экрана параметр query
-                        // и экран перерисовывает заметки содержащие строку == query в контенте или тайтле
+                        viewModel.processCommand(NotesCommand.InputSearchQuery(it))//
+                    // Это результат встроенной функции TextField onValueChange
+                        // и мы кладем его под видом it в NotesCommand.InputSearchQuery, то есть мы таким образом получили ввод, соответственно query, а во вьюмодели мы заапдэйтим стэйт query а к нему привязан и стэйт экрана (у нас там два стэйта)
                     }
                 )
             }
