@@ -1,7 +1,9 @@
 package com.example.notes.presentation.screens.editing
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.notes.data.NotesRepositoryImpl
 import com.example.notes.data.TestNotesRepositoryImpl
 import com.example.notes.domain.AddNoteUseCase
 import com.example.notes.domain.DeleteNoteUseCase
@@ -13,8 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class EditNoteViewModel(private val noteId:Int) : ViewModel() {
-    private val repository = TestNotesRepositoryImpl
+class EditNoteViewModel(private val noteId:Int,context: Context) : ViewModel() {
+    private val repository = NotesRepositoryImpl.getInstance(context)
     private val editNoteUseCase = EditNoteUseCase(repository)
     private val getNoteUseCase = GetNoteUseCase(repository)
     private val deleteNoteUseCase = DeleteNoteUseCase(repository)
@@ -41,8 +43,8 @@ class EditNoteViewModel(private val noteId:Int) : ViewModel() {
             is EditNoteCommand.InputContent -> {//это если мы уже в состоянии Creation и начали например заполнять тайтл или контент
                 _state.update { previousState ->
                     if (previousState is EditNoteState.Editing) {
-                        val newNote = previousState.note.copy(content = command.content)
-                        previousState.copy(note = newNote)
+                        val newNote = previousState.note.copy(content = command.content)//взяли заметку из текущего стэйта и изменили в ней поле контент
+                        previousState.copy(note = newNote)//взяли текущий стэйт экрана и вставили в него заметку с измененным полем контент
                     } else {
                         previousState// если не состояние Editing значит ошибка. Но мы просто сохраним предыдущее состояние
                     }

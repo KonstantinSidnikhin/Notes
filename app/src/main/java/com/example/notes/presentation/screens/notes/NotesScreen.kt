@@ -1,6 +1,7 @@
 package com.example.notes.presentation.screens.notes
 
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -34,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,7 +52,10 @@ import com.example.notes.R
 @Composable
 fun NotesScreen(
     modifier: Modifier = Modifier,
-    viewModel: NotesViewModel = viewModel(),
+    context: Context =  LocalContext.current.applicationContext,
+    viewModel: NotesViewModel = viewModel{
+        NotesViewModel(context)
+    },
     onNoteClick1: (Note) -> Unit,// плэйсхолдер для коллбэка который мы реализуем в навигации
     onAddNoteClick: () -> Unit
 ) {
@@ -131,7 +136,7 @@ fun NotesScreen(
 //                            onNoteClick = {
 //                                viewModel.processCommand(NotesCommand.EditNote(it))
 //                            },
-                            onNoteClick = onNoteClick1, //передаем колбэк который в модифаере. Там мы сделали плэйсхолдер, его логику мы определим далее
+                            onNoteClick = onNoteClick1, //передаем колбэк который в модифаере. Там мы сделали плэйсхолдер, его логику мы определим в NavGraph
                             //  onDoubleClick = {
                             //   viewModel.processCommand(NotesCommand.DeleteNote(note.id))
                             //  },

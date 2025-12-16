@@ -8,3 +8,6 @@ fun Note.toDbModel(): NoteDbModel{// мапер преобразовывает �
 fun NoteDbModel.toEntity():Note{
     return Note(id,title,content,updatedAt,isPinned)
 }
+fun List<NoteDbModel>.toEntities():List<Note>{// extra fun
+    return this.map { it.toEntity() }
+}

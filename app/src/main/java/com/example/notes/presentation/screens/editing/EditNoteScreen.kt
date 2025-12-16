@@ -2,6 +2,7 @@
 
 package com.example.notes.presentation.screens.editing
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,8 +44,10 @@ import com.example.notes.presentation.utils.DateFormatter
 fun EditNoteScreen(
     modifier: Modifier = Modifier,
     noteId: Int,// id of the note we pass with constructor
+    context: Context =  LocalContext.current.applicationContext,
     viewModel: EditNoteViewModel = viewModel {
-        EditNoteViewModel(noteId)//this way we make instance of viewmodel with parameter. cause we can't make viewmodel(noteId)
+
+        EditNoteViewModel(noteId,context)//this way we make instance of viewmodel with parameter. cause we can't make viewmodel(noteId)
     },
     onFinished: () -> Unit
 ) {
@@ -144,6 +148,7 @@ fun EditNoteScreen(
                         value = currentState.note.content,//slightly changed
                         onValueChange = {
                             viewModel.processCommand(InputContent(it))//срабатывают проверки заполнены ли другие поля и обновляется стэйт
+                            // тут происходит главная магия мы обращаясь к вьюмодели для ее метода InputContent передаем результат onValueChange под видом it
                         },
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,

@@ -35,7 +35,7 @@ fun NavGraph() {
                 }
             )
         }
-        composable(Screen.EditNote.route) {// если строка "create_note" то выполнится функция далее
+        composable(Screen.EditNote.route) {// если строка "edit_note/{note_id}" то выполнится функция далее
 
             val noteId = it.arguments?.getString("note_id")?.toInt() ?: 0// тут it это NavBackStackEntry а arguments один из его встроенных параметров.
            // val noteId = Screen.EditNote.getNoteId(it.arguments)
