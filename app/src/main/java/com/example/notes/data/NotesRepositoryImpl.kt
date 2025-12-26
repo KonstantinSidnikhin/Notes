@@ -15,8 +15,10 @@ class NotesRepositoryImpl private constructor(context: Context) : NotesRepositor
         isPinned: Boolean,
         updatedAt: Long
     ) {
+        val noteDbModel = NoteDbModel(0, title, content, updatedAt, isPinned)
         notesDao.addNote(noteDbModel)
     }
+
 
     override suspend fun deleteNote(noteId: Int) {
         notesDao.deleteNote(noteId)
@@ -27,6 +29,7 @@ class NotesRepositoryImpl private constructor(context: Context) : NotesRepositor
 
     override fun getAllNotes(): Flow<List<Note>> {
         return notesDao.getAllNotes().map {
+            it.toEntities()
         }
     }
 
@@ -39,17 +42,20 @@ class NotesRepositoryImpl private constructor(context: Context) : NotesRepositor
     }
 
     override suspend fun switchPinnedStatus(noteId: Int) {
+        notesDao.switchPinnedStatus(noteId)
 
-    companion object{
+    }
+
+    companion object {
         private val LOCK = Any()
         private var instance: NotesRepositoryImpl? = null
-        fun getInstance(context:Context): NotesRepositoryImpl{
+        fun getInstance(context: Context): NotesRepositoryImpl {
             instance?.let { return it }
-            synchronized(LOCK){
+            synchronized(LOCK) {
                 instance?.let { return it }
-               return NotesRepositoryImpl(context).also {
-                   instance = it
-               }
+                return NotesRepositoryImpl(context).also {
+                    instance = it
+                }
             }
         }
     }
