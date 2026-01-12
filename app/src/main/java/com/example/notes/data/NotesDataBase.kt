@@ -22,7 +22,7 @@ abstract class NotesDataBase : RoomDatabase(){
                     context = context,
                     klass = NotesDataBase::class.java,
                     name = "notes.db"
-                ).build().also {
+                ).build().also {// мы тут поиграли с обьектом db (присвоили его значение переменной instance) и вернули db/ так работает also
                     instance = it
                 }
             }
