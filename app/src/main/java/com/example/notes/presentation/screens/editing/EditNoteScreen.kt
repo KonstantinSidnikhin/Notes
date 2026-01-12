@@ -32,6 +32,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notes.presentation.screens.creation.CreateNoteCommand
 import com.example.notes.presentation.screens.creation.CreateNoteState
@@ -44,11 +45,11 @@ import com.example.notes.presentation.utils.DateFormatter
 fun EditNoteScreen(
     modifier: Modifier = Modifier,
     noteId: Int,// id of the note we pass with constructor
-    context: Context =  LocalContext.current.applicationContext,
-    viewModel: EditNoteViewModel = viewModel {
-
-        EditNoteViewModel(noteId,context)//this way we make instance of viewmodel with parameter. cause we can't make viewmodel(noteId)
-    },
+    viewModel: EditNoteViewModel = hiltViewModel(
+        creationCallback = {factory:EditNoteViewModel.Factory->
+            factory.create(noteId)
+        }
+    ),
     onFinished: () -> Unit
 ) {
     val state = viewModel.state.collectAsState()

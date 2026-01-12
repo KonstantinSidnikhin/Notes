@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notes.domain.Note
 import com.example.notes.presentation.ui.theme.OtherNotesColors
@@ -52,10 +53,7 @@ import com.example.notes.R
 @Composable
 fun NotesScreen(
     modifier: Modifier = Modifier,
-    context: Context =  LocalContext.current.applicationContext,
-    viewModel: NotesViewModel = viewModel{
-        NotesViewModel(context)
-    },
+    viewModel: NotesViewModel = hiltViewModel(),
     onNoteClick1: (Note) -> Unit,// плэйсхолдер для коллбэка который мы реализуем в навигации
     onAddNoteClick: () -> Unit
 ) {

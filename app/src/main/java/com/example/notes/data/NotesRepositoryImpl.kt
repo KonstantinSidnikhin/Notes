@@ -5,10 +5,11 @@ import com.example.notes.domain.Note
 import com.example.notes.domain.NotesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class NotesRepositoryImpl private constructor(context: Context) : NotesRepository {
-    private val notesDatabase = NotesDataBase.getInstance(context)
-    private val notesDao = notesDatabase.notesDao()
+class NotesRepositoryImpl @Inject constructor(private val notesDao: NotesDao) : NotesRepository {
+    //    private val notesDatabase = NotesDataBase.getInstance(context)
+//    private val notesDao = notesDatabase.notesDao()
     override suspend fun addNote(
         title: String,
         content: String,
@@ -46,17 +47,4 @@ class NotesRepositoryImpl private constructor(context: Context) : NotesRepositor
 
     }
 
-    companion object {
-        private val LOCK = Any()
-        private var instance: NotesRepositoryImpl? = null
-        fun getInstance(context: Context): NotesRepositoryImpl {
-            instance?.let { return it }
-            synchronized(LOCK) {
-                instance?.let { return it }
-                return NotesRepositoryImpl(context).also {
-                    instance = it
-                }
-            }
-        }
-    }
 }

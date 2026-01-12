@@ -10,20 +10,27 @@ import com.example.notes.domain.DeleteNoteUseCase
 import com.example.notes.domain.EditNoteUseCase
 import com.example.notes.domain.GetNoteUseCase
 import com.example.notes.domain.Note
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+@HiltViewModel(assistedFactory = EditNoteViewModel.Factory::class)
+class EditNoteViewModel @AssistedInject constructor(
+    @Assisted("noteId") private val noteId: Int,
+    private val editNoteUseCase: EditNoteUseCase,
+    private val getNoteUseCase: GetNoteUseCase,
+    private val deleteNoteUseCase: DeleteNoteUseCase
+) : ViewModel() {
 
-class EditNoteViewModel(private val noteId:Int,context: Context) : ViewModel() {
-    private val repository = NotesRepositoryImpl.getInstance(context)
-    private val editNoteUseCase = EditNoteUseCase(repository)
-    private val getNoteUseCase = GetNoteUseCase(repository)
-    private val deleteNoteUseCase = DeleteNoteUseCase(repository)
     private val _state = MutableStateFlow<EditNoteState>(EditNoteState.Initial)//Здесь
 
     // в угловых скобках надо параметризировать что бы дать возможность и для Finished
     val state = _state.asStateFlow()
+
     init {
         viewModelScope.launch {
             _state.update {
@@ -43,7 +50,8 @@ class EditNoteViewModel(private val noteId:Int,context: Context) : ViewModel() {
             is EditNoteCommand.InputContent -> {//это если мы уже в состоянии Creation и начали например заполнять тайтл или контент
                 _state.update { previousState ->
                     if (previousState is EditNoteState.Editing) {
-                        val newNote = previousState.note.copy(content = command.content)//взяли заметку из текущего стэйта и изменили в ней поле контент
+                        val newNote =
+                            previousState.note.copy(content = command.content)//взяли заметку из текущего стэйта и изменили в ней поле контент
                         previousState.copy(note = newNote)//взяли текущий стэйт экрана и вставили в него заметку с измененным полем контент
                     } else {
                         previousState// если не состояние Editing значит ошибка. Но мы просто сохраним предыдущее состояние
@@ -69,7 +77,7 @@ class EditNoteViewModel(private val noteId:Int,context: Context) : ViewModel() {
                     _state.update { previousState ->
                         if (previousState is EditNoteState.Editing) {
                             val note = previousState.note
-                           editNoteUseCase(note)
+                            editNoteUseCase(note)
                             EditNoteState.Finished// мы создали заметку и все, и должны перейти на другой экран
                         } else {
                             previousState
@@ -93,7 +101,11 @@ class EditNoteViewModel(private val noteId:Int,context: Context) : ViewModel() {
             }
         }
     }
-
+@AssistedFactory
+interface Factory{
+    fun create(
+        @Assisted("noteId") noteId:Int): EditNoteViewModel
+}
 
 }
 

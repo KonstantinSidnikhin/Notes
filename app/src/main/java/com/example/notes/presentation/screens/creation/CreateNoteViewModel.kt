@@ -6,14 +6,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.notes.data.NotesRepositoryImpl
 import com.example.notes.data.TestNotesRepositoryImpl
 import com.example.notes.domain.AddNoteUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-class CreateNoteViewModel(context: Context) : ViewModel() {
-    private val repository = NotesRepositoryImpl.getInstance(context)
-    private val addNoteUseCase = AddNoteUseCase(repository)
+import javax.inject.Inject
+@HiltViewModel
+class CreateNoteViewModel @Inject constructor(private val addNoteUseCase: AddNoteUseCase) : ViewModel() {
     private val _state = MutableStateFlow<CreateNoteState>(CreateNoteState.Creation())//Здесь
 
     // в угловых скобках надо параметризировать что бы дать возможность и для Finished
