@@ -1,11 +1,8 @@
 package com.example.notes.presentation.screens.editing
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.notes.data.NotesRepositoryImpl
-import com.example.notes.data.TestNotesRepositoryImpl
-import com.example.notes.domain.AddNoteUseCase
+import com.example.notes.domain.ContentItem
 import com.example.notes.domain.DeleteNoteUseCase
 import com.example.notes.domain.EditNoteUseCase
 import com.example.notes.domain.GetNoteUseCase
@@ -18,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
 @HiltViewModel(assistedFactory = EditNoteViewModel.Factory::class)
 class EditNoteViewModel @AssistedInject constructor(
     @Assisted("noteId") private val noteId: Int,
@@ -50,8 +48,9 @@ class EditNoteViewModel @AssistedInject constructor(
             is EditNoteCommand.InputContent -> {//это если мы уже в состоянии Creation и начали например заполнять тайтл или контент
                 _state.update { previousState ->
                     if (previousState is EditNoteState.Editing) {
+                        val newContent = ContentItem.Text(content = command.content)
                         val newNote =
-                            previousState.note.copy(content = command.content)//взяли заметку из текущего стэйта и изменили в ней поле контент
+                            previousState.note.copy(content = listOf(newContent))//взяли заметку из текущего стэйта и изменили в ней поле контент
                         previousState.copy(note = newNote)//взяли текущий стэйт экрана и вставили в него заметку с измененным полем контент
                     } else {
                         previousState// если не состояние Editing значит ошибка. Но мы просто сохраним предыдущее состояние
@@ -101,11 +100,13 @@ class EditNoteViewModel @AssistedInject constructor(
             }
         }
     }
-@AssistedFactory
-interface Factory{
-    fun create(
-        @Assisted("noteId") noteId:Int): EditNoteViewModel
-}
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            @Assisted("noteId") noteId: Int
+        ): EditNoteViewModel
+    }
 
 }
 
@@ -127,7 +128,18 @@ sealed interface EditNoteState {
         val note: Note
     ) : EditNoteState {
         val isSaveEnabled: Boolean
-            get() = note.title.isNotBlank() && note.content.isNotBlank()
+            get() {
+                return when {
+                    note.title.isBlank() -> false////тут если тайтл не пустой и контент не пустой
+                    note.content.isEmpty() -> false
+                    else -> {
+                        note.content.any {
+                            it !is ContentItem.Text || it.content.isNotBlank()//если есть хотя бы картинка (не текст) то сохраняем.
+                        }
+                    }
+                }
+            }
+
     }
 
     data object Finished : EditNoteState

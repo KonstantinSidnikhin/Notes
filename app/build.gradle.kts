@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
+
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
@@ -62,6 +64,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.8.4")
 
     implementation ("androidx.navigation:navigation-compose:2.9.6")
+    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
 
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)

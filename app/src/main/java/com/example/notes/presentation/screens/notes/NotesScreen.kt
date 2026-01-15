@@ -48,6 +48,7 @@ import com.example.notes.presentation.ui.theme.OtherNotesColors
 import com.example.notes.presentation.ui.theme.PinnedNotesColors
 import com.example.notes.presentation.utils.DateFormatter
 import com.example.notes.R
+import com.example.notes.domain.ContentItem
 
 
 @Composable
@@ -81,7 +82,7 @@ fun NotesScreen(
         }
     )
 
-   { innerPadding ->
+    { innerPadding ->
         LazyColumn(
             contentPadding = innerPadding,
             //.verticalScroll(rememberScrollState()),\\в лэйзи колум уже под капотом есть скрол стэйт
@@ -101,7 +102,7 @@ fun NotesScreen(
                     query = state.query,
                     onQueryChange = {//в описании функции (в низу)мы просто сделали пустышку а тут описали функционал
                         viewModel.processCommand(NotesCommand.InputSearchQuery(it))//
-                    // Это результат встроенной функции TextField onValueChange
+                        // Это результат встроенной функции TextField onValueChange
                         // и мы кладем его под видом it в NotesCommand.InputSearchQuery, то есть мы таким образом получили ввод, соответственно query, а во вьюмодели мы заапдэйтим стэйт query а к нему привязан и стэйт экрана (у нас там два стэйта)
                     }
                 )
@@ -256,7 +257,6 @@ private fun SearchBar(
 }
 
 
-
 @Composable
 private fun Subtitle(
     modifier: Modifier = Modifier,
@@ -320,16 +320,22 @@ fun NoteCard(
         Spacer(
             modifier = Modifier.height(24.dp)
         )
-        Text(
+        note.content//коллекция элементов контента
+            .filterIsInstance<ContentItem.Text>()
+            .joinToString("\n") { it.content }//соединяем в одну большую строку
+            .let {
+                Text(// и эту строку отображаем внутри композабл функции текст
 
-            text = note.content,
-            fontSize = 16.sp,
-            maxLines = 3,// максимум три строки
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Medium,
-            overflow = TextOverflow.Ellipsis
+                    text = it,
+                    fontSize = 16.sp,
+                    maxLines = 3,// максимум три строки
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Medium,
+                    overflow = TextOverflow.Ellipsis
 
-        )
+                )
+            }
+
     }
 
 }

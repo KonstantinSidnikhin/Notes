@@ -21,7 +21,7 @@ fun NavGraph() {
                 onNoteClick1 = {// в функции NotesScreen у нас был плэйс холдер для коллбэка, вот тут мы реализуем его.
                     // navController.navigate(Screen.EditNote.route + "/${it.id}")
                     navController.navigate(Screen.EditNote.createRoute(it.id))//Тут it это обьект заметки Note
-                               // эта строка то же самое что и navController.navigate("edit_note/$noteId")
+                    // эта строка то же самое что и navController.navigate("edit_note/$noteId")
                 },
                 onAddNoteClick = {
                     navController.navigate(Screen.CreateNote.route)
@@ -38,7 +38,7 @@ fun NavGraph() {
         composable(Screen.EditNote.route) {// если строка "edit_note/{note_id}" то выполнится функция далее
 
             val noteId = it.arguments?.getString("note_id")?.toInt() ?: 0// тут it это NavBackStackEntry а arguments один из его встроенных параметров.
-           // val noteId = Screen.EditNote.getNoteId(it.arguments)
+            // val noteId = Screen.EditNote.getNoteId(it.arguments)
             EditNoteScreen(
                 noteId = noteId,
                 onFinished = {

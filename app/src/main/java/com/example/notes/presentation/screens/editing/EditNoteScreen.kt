@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.notes.domain.ContentItem
 import com.example.notes.presentation.screens.creation.CreateNoteCommand
 import com.example.notes.presentation.screens.creation.CreateNoteState
 import com.example.notes.presentation.screens.creation.CreateNoteViewModel
@@ -46,7 +47,7 @@ fun EditNoteScreen(
     modifier: Modifier = Modifier,
     noteId: Int,// id of the note we pass with constructor
     viewModel: EditNoteViewModel = hiltViewModel(
-        creationCallback = {factory:EditNoteViewModel.Factory->
+        creationCallback = { factory: EditNoteViewModel.Factory ->
             factory.create(noteId)
         }
     ),
@@ -141,35 +142,16 @@ fun EditNoteScreen(
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    TextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                            .weight(1f),
-                        value = currentState.note.content,//slightly changed
-                        onValueChange = {
-                            viewModel.processCommand(InputContent(it))//срабатывают проверки заполнены ли другие поля и обновляется стэйт
-                            // тут происходит главная магия мы обращаясь к вьюмодели для ее метода InputContent передаем результат onValueChange под видом it
-                        },
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                        ),
-                        textStyle = TextStyle(
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                        placeholder = {
-                            Text(
-
-                                text = "write something below...",
-                                fontSize = 16.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(0.2f)
-                            )
+                currentState.note.content.filterIsInstance<ContentItem.Text>()// фильтруем оставляя только текст
+                    .forEach { contentItem ->
+                    TextContent(modifier = Modifier.weight(1f),// для каждого элемента текст вызываем поле ввода
+                        text = contentItem.content,
+                        onTextChanged = {
+                            viewModel.processCommand(EditNoteCommand.InputContent(it))
                         }
+
                     )
+                }
                     Button(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -204,4 +186,37 @@ fun EditNoteScreen(
 
         }
     }
+}
+
+@Composable
+private fun TextContent(
+    modifier: Modifier = Modifier,
+    text: String,
+    onTextChanged:(String)->Unit
+) {
+    TextField(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        value = text,
+        onValueChange = onTextChanged,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+        ),
+        textStyle = TextStyle(
+            fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        ),
+        placeholder = {
+            Text(
+
+                text = "write something below...",
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(0.2f)
+            )
+        }
+    )
 }
