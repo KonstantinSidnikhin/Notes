@@ -18,10 +18,10 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel(assistedFactory = EditNoteViewModel.Factory::class)
 class EditNoteViewModel @AssistedInject constructor(
-    @Assisted("noteId") private val noteId: Int,
     private val editNoteUseCase: EditNoteUseCase,
     private val getNoteUseCase: GetNoteUseCase,
-    private val deleteNoteUseCase: DeleteNoteUseCase
+    private val deleteNoteUseCase: DeleteNoteUseCase,
+    @Assisted("noteId") private val noteId: Int
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<EditNoteState>(EditNoteState.Initial)//Здесь
@@ -77,6 +77,7 @@ class EditNoteViewModel @AssistedInject constructor(
                         if (previousState is EditNoteState.Editing) {
                             val note = previousState.note
                             editNoteUseCase(note)
+
                             EditNoteState.Finished// мы создали заметку и все, и должны перейти на другой экран
                         } else {
                             previousState

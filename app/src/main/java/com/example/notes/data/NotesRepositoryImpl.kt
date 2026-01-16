@@ -27,6 +27,7 @@ class NotesRepositoryImpl @Inject constructor(private val notesDao: NotesDao) : 
     }
 
     override suspend fun editNote(note: Note) {
+
     }
 
     override fun getAllNotes(): Flow<List<Note>> {
