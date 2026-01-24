@@ -1,5 +1,6 @@
 package com.example.notes.presentation.screens.creation
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notes.domain.AddNoteUseCase
@@ -12,7 +13,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CreateNoteViewModel @Inject constructor(private val addNoteUseCase: AddNoteUseCase) : ViewModel() {
+class CreateNoteViewModel @Inject constructor(private val addNoteUseCase: AddNoteUseCase) :
+    ViewModel() {
     private val _state = MutableStateFlow<CreateNoteState>(CreateNoteState.Creation())//Здесь
 
     // в угловых скобках надо параметризировать что бы дать возможность и для Finished
@@ -28,12 +30,21 @@ class CreateNoteViewModel @Inject constructor(private val addNoteUseCase: AddNot
             is CreateNoteCommand.InputContent -> {//это если мы уже в состоянии Creation и начали например заполнять тайтл или контент
                 _state.update { previousState ->
                     if (previousState is CreateNoteState.Creation) {//если мы в состоянии Creation
+                        val newContent = previousState.content
+                            .mapIndexed { index: Int, contentItem: ContentItem ->
+                                if (index == command.index && contentItem is ContentItem.Text) {
+                                    contentItem.copy(content = command.content)
+                                } else {
+                                    contentItem
+                                }
+
+                            }
                         previousState.copy(// копируем для сохранения тайтла, если он есть
-                            content = command.content,
-                            isSaveEnabled = previousState.title.isNotBlank() && command.content.isNotBlank()
+                            content = newContent
+
                         )
                     } else {
-                        CreateNoteState.Creation(content = command.content)//а тут вызываем состояние Creation в первый раз поэтому copy не надо делать, там стэйта нет и просто назначаем полю контент значение из command
+                        previousState
                     }
 
                 }
@@ -43,11 +54,11 @@ class CreateNoteViewModel @Inject constructor(private val addNoteUseCase: AddNot
                 _state.update { previousState ->
                     if (previousState is CreateNoteState.Creation) {
                         previousState.copy(
-                            title = command.title,
-                            isSaveEnabled = previousState.content.isNotBlank() && command.title.isNotBlank()
+                            title = command.title
+
                         )
                     } else {
-                        CreateNoteState.Creation(title = command.title)
+                        previousState
                     }
 
                 }
@@ -58,13 +69,34 @@ class CreateNoteViewModel @Inject constructor(private val addNoteUseCase: AddNot
                     _state.update { previousState ->
                         if (previousState is CreateNoteState.Creation) {
                             val title = previousState.title
-                            val content = ContentItem.Text(previousState.content)
-                            addNoteUseCase(title, listOf(content))//не забыть добавить заметку
+                            val content = previousState.content.filter {
+                                it !is ContentItem.Text || it.content.isNotBlank()
+                            }
+                            addNoteUseCase(title, content)//не забыть добавить заметку
                             CreateNoteState.Finished// мы создали заметку и все, и должны перейти на другой экран
                         } else {
                             previousState
                         }
                     }
+                }
+            }
+
+            is CreateNoteCommand.AddImage -> {
+                _state.update { previousState: CreateNoteState ->
+                    if (previousState is CreateNoteState.Creation) {
+
+                        val newItems =previousState.content.toMutableList()
+                        val lastItem =newItems.last()
+                        if (lastItem is ContentItem.Text && lastItem.content.isBlank()){
+                            newItems.removeAt(newItems.lastIndex)
+                        }
+                        newItems.add(ContentItem.Image(command.uri.toString()))
+                        newItems.add(ContentItem.Text(""))
+                        previousState.copy(content = newItems)
+                    } else {
+                        previousState
+                    }
+
                 }
             }
         }
@@ -74,21 +106,34 @@ class CreateNoteViewModel @Inject constructor(private val addNoteUseCase: AddNot
 }
 
 sealed interface CreateNoteCommand {
+    data class AddImage(val uri: Uri) : CreateNoteCommand
     data class InputTitle(val title: String) : CreateNoteCommand
-    data class InputContent(val content: String) : CreateNoteCommand
+    data class InputContent(val content: String, val index: Int) : CreateNoteCommand
     data object Save : CreateNoteCommand
     data object Back : CreateNoteCommand
 
 }
 
 
-
 sealed interface CreateNoteState {
     data class Creation(
         val title: String = "",
-        val content: String = "",
-        val isSaveEnabled: Boolean = false
-    ) : CreateNoteState
+        val content: List<ContentItem> = listOf(ContentItem.Text("")),
+
+        ) : CreateNoteState {
+        val isSaveEnabled: Boolean
+            get() {
+                return when {
+                    title.isBlank() -> false////тут если тайтл не пустой и контент не пустой
+                    content.isEmpty() -> false
+                    else -> {
+                        content.any {
+                            it !is ContentItem.Text || it.content.isNotBlank()//если есть хотя бы картинка (не текст) то сохраняем.
+                        }
+                    }
+                }
+            }
+    }
 
     data object Finished : CreateNoteState
 

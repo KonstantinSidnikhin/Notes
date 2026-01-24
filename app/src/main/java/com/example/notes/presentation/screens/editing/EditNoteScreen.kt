@@ -144,7 +144,8 @@ fun EditNoteScreen(
                     )
                 currentState.note.content.filterIsInstance<ContentItem.Text>()// фильтруем оставляя только текст
                     .forEach { contentItem ->
-                    TextContent(modifier = Modifier.weight(1f),// для каждого элемента текст вызываем поле ввода
+                    TextContent(
+                        modifier = Modifier.weight(1f),// для каждого элемента текст вызываем поле ввода
                         text = contentItem.content,
                         onTextChanged = {
                             viewModel.processCommand(EditNoteCommand.InputContent(it))
