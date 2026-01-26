@@ -30,15 +30,19 @@ class CreateNoteViewModel @Inject constructor(private val addNoteUseCase: AddNot
             is CreateNoteCommand.InputContent -> {//это если мы уже в состоянии Creation и начали например заполнять тайтл или контент
                 _state.update { previousState ->
                     if (previousState is CreateNoteState.Creation) {//если мы в состоянии Creation
-                        val newContent = previousState.content
-                            .mapIndexed { index: Int, contentItem: ContentItem ->
-                                if (index == command.index && contentItem is ContentItem.Text) {
-                                    contentItem.copy(content = command.content)
-                                } else {
-                                    contentItem
-                                }
+                        val newContent =
+                            previousState.content//Изображения (не текстовые элементы) не удаляются при редактировании текста
+                                //Они остаются в списке content независимо от содержимого текстовых полей
+                                //Сохранение изображений происходит только при их добавлении через AddImage
+                                // Проверка возможности сохранения (isSaveEnabled) учитывает наличие изображений:
+                                .mapIndexed { index: Int, contentItem: ContentItem ->
+                                    if (index == command.index && contentItem is ContentItem.Text) {
+                                        contentItem.copy(content = command.content)
+                                    } else {
+                                        contentItem
+                                    }
 
-                            }
+                                }
                         previousState.copy(// копируем для сохранения тайтла, если он есть
                             content = newContent
 
@@ -69,7 +73,7 @@ class CreateNoteViewModel @Inject constructor(private val addNoteUseCase: AddNot
                     _state.update { previousState ->
                         if (previousState is CreateNoteState.Creation) {
                             val title = previousState.title
-                            val content = previousState.content.filter {
+                            val content = previousState.content.filter {//оставим в контенте не текст(картинки) или если текст не пустой
                                 it !is ContentItem.Text || it.content.isNotBlank()
                             }
                             addNoteUseCase(title, content)//не забыть добавить заметку
@@ -85,9 +89,9 @@ class CreateNoteViewModel @Inject constructor(private val addNoteUseCase: AddNot
                 _state.update { previousState: CreateNoteState ->
                     if (previousState is CreateNoteState.Creation) {
 
-                        val newItems =previousState.content.toMutableList()
-                        val lastItem =newItems.last()
-                        if (lastItem is ContentItem.Text && lastItem.content.isBlank()){
+                        val newItems = previousState.content.toMutableList()
+                        val lastItem = newItems.last()
+                        if (lastItem is ContentItem.Text && lastItem.content.isBlank()) {
                             newItems.removeAt(newItems.lastIndex)
                         }
                         newItems.add(ContentItem.Image(command.uri.toString()))
