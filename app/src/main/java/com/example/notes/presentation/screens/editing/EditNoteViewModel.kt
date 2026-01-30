@@ -1,7 +1,9 @@
 package com.example.notes.presentation.screens.editing
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+
 import com.example.notes.domain.ContentItem
 import com.example.notes.domain.DeleteNoteUseCase
 import com.example.notes.domain.EditNoteUseCase
@@ -24,16 +26,19 @@ class EditNoteViewModel @AssistedInject constructor(
     @Assisted("noteId") private val noteId: Int
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<EditNoteState>(EditNoteState.Initial)//Здесь
-
-    // в угловых скобках надо параметризировать что бы дать возможность и для Finished
+    private val _state = MutableStateFlow<EditNoteState>(EditNoteState.Initial)
     val state = _state.asStateFlow()
 
     init {
         viewModelScope.launch {
             _state.update {
-                val note = getNoteUseCase(noteId)//noteId came in constructor of the class
-                EditNoteState.Editing(note)
+                val note = getNoteUseCase(noteId)
+                val content = if (note.content.lastOrNull() !is ContentItem.Text) {
+                    note.content + ContentItem.Text("")
+                } else {
+                    note.content
+                }
+                EditNoteState.Editing(note.copy(content = content))
             }
         }
     }
@@ -41,21 +46,26 @@ class EditNoteViewModel @AssistedInject constructor(
     fun processCommand(command: EditNoteCommand) {
         when (command) {
             EditNoteCommand.Back -> {
-
                 _state.update { EditNoteState.Finished }
             }
 
-            is EditNoteCommand.InputContent -> {//это если мы уже в состоянии Creation и начали например заполнять тайтл или контент
+            is EditNoteCommand.InputContent -> {
                 _state.update { previousState ->
                     if (previousState is EditNoteState.Editing) {
-                        val newContent = ContentItem.Text(content = command.content)
-                        val newNote =
-                            previousState.note.copy(content = listOf(newContent))//взяли заметку из текущего стэйта и изменили в ней поле контент
-                        previousState.copy(note = newNote)//взяли текущий стэйт экрана и вставили в него заметку с измененным полем контент
+                        val newContent = previousState.note
+                            .content
+                            .mapIndexed { index, contentItem ->
+                                if (index == command.index && contentItem is ContentItem.Text) {
+                                    contentItem.copy(content = command.content)
+                                } else {
+                                    contentItem
+                                }
+                            }
+                        val newNote = previousState.note.copy(content = newContent)
+                        previousState.copy(note = newNote)
                     } else {
-                        previousState// если не состояние Editing значит ошибка. Но мы просто сохраним предыдущее состояние
+                        previousState
                     }
-
                 }
             }
 
@@ -65,9 +75,8 @@ class EditNoteViewModel @AssistedInject constructor(
                         val newNote = previousState.note.copy(title = command.title)
                         previousState.copy(note = newNote)
                     } else {
-                        previousState// если не состояние Editing значит ошибка. Но мы просто сохраним предыдущее состояние
+                        previousState
                     }
-
                 }
             }
 
@@ -76,9 +85,11 @@ class EditNoteViewModel @AssistedInject constructor(
                     _state.update { previousState ->
                         if (previousState is EditNoteState.Editing) {
                             val note = previousState.note
-                            editNoteUseCase(note)
-
-                            EditNoteState.Finished// мы создали заметку и все, и должны перейти на другой экран
+                            val content = note.content.filter {
+                                it !is ContentItem.Text || it.content.isNotBlank()
+                            }
+                            editNoteUseCase(note.copy(content = content))
+                            EditNoteState.Finished
                         } else {
                             previousState
                         }
@@ -92,10 +103,47 @@ class EditNoteViewModel @AssistedInject constructor(
                         if (previousState is EditNoteState.Editing) {
                             val note = previousState.note
                             deleteNoteUseCase(note.id)
-                            EditNoteState.Finished// мы создали заметку и все, и должны перейти на другой экран
+                            EditNoteState.Finished
                         } else {
                             previousState
                         }
+                    }
+                }
+            }
+
+            is EditNoteCommand.AddImage -> {
+                _state.update { previousState ->
+                    if (previousState is EditNoteState.Editing) {
+                        val oldNote = previousState.note
+                        oldNote.content.toMutableList().apply {
+                            val lastItem = last()
+                            if (lastItem is ContentItem.Text && lastItem.content.isBlank()) {
+                                removeAt(lastIndex)
+                            }
+                            add(ContentItem.Image(command.uri.toString()))
+                            add(ContentItem.Text(""))
+                        }.let {
+                            val newNote = oldNote.copy(content = it)
+                            previousState.copy(note = newNote)
+                        }
+                    } else {
+                        previousState
+                    }
+                }
+            }
+
+            is EditNoteCommand.DeleteImage -> {
+                _state.update { previousState ->
+                    if (previousState is EditNoteState.Editing) {
+                        val oldNote = previousState.note
+                        oldNote.content.toMutableList().apply {
+                            removeAt(command.index)
+                        }.let {
+                            val newNote = oldNote.copy(content = it)
+                            previousState.copy(note = newNote)
+                        }
+                    } else {
+                        previousState
                     }
                 }
             }
@@ -104,45 +152,51 @@ class EditNoteViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
+
         fun create(
             @Assisted("noteId") noteId: Int
         ): EditNoteViewModel
     }
-
 }
 
 sealed interface EditNoteCommand {
-    data class InputTitle(val title: String) : EditNoteCommand
-    data class InputContent(val content: String) : EditNoteCommand
-    data object Save : EditNoteCommand
-    data object Back : EditNoteCommand
-    data object Delete : EditNoteCommand
 
+    data class InputTitle(val title: String) : EditNoteCommand
+
+    data class InputContent(val content: String, val index: Int) : EditNoteCommand
+
+    data class AddImage(val uri: Uri) : EditNoteCommand
+
+    data class DeleteImage(val index: Int) : EditNoteCommand
+
+    data object Save : EditNoteCommand
+
+    data object Back : EditNoteCommand
+
+    data object Delete : EditNoteCommand
 }
 
-
 sealed interface EditNoteState {
-    data object Initial :
-        EditNoteState// если бы мы грузили данные с интернета то тут бы показывали прогресс бар например
+
+    data object Initial : EditNoteState
 
     data class Editing(
         val note: Note
     ) : EditNoteState {
+
         val isSaveEnabled: Boolean
             get() {
                 return when {
-                    note.title.isBlank() -> false////тут если тайтл не пустой и контент не пустой
+                    note.title.isBlank() -> false
                     note.content.isEmpty() -> false
                     else -> {
                         note.content.any {
-                            it !is ContentItem.Text || it.content.isNotBlank()//если есть хотя бы картинка (не текст) то сохраняем.
+                            it !is ContentItem.Text || it.content.isNotBlank()
                         }
                     }
                 }
             }
-
     }
 
     data object Finished : EditNoteState
-
 }

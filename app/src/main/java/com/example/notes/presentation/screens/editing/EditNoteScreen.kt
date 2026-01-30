@@ -2,7 +2,10 @@
 
 package com.example.notes.presentation.screens.editing
 
+import Content
 import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -39,13 +44,211 @@ import com.example.notes.presentation.screens.creation.CreateNoteCommand
 import com.example.notes.presentation.screens.creation.CreateNoteState
 import com.example.notes.presentation.screens.creation.CreateNoteViewModel
 import com.example.notes.presentation.screens.editing.EditNoteCommand.*
+import com.example.notes.presentation.ui.theme.CustomIcons
 import com.example.notes.presentation.utils.DateFormatter
 
 
+//@Composable
+//fun EditNoteScreen(
+//    modifier: Modifier = Modifier,
+//    noteId: Int,// id of the note we pass with constructor
+//    viewModel: EditNoteViewModel = hiltViewModel(
+//        creationCallback = { factory: EditNoteViewModel.Factory ->
+//            factory.create(noteId)
+//        }
+//    ),
+//    onFinished: () -> Unit
+//) {
+//    val state = viewModel.state.collectAsState()
+//    val currentState = state.value
+//    val imagePicker = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.GetContent(),
+//        onResult = {
+//            uri ->uri?.let{
+//                viewModel.processCommand((EditNoteCommand.AddImage(it)))
+//        }
+//        }
+//    )
+//
+//    when (currentState) {
+//        is EditNoteState.Editing -> {
+//
+//            Scaffold(
+//                modifier = modifier,
+//                topBar = {
+//                    TopAppBar(
+//                        title = {
+//                            Text(
+//                                text = "Edit note",
+//                                fontSize = 20.sp,
+//                                fontWeight = FontWeight.Bold,
+//                                color = MaterialTheme.colorScheme.onSurface
+//                            )
+//                        },
+//                        colors = TopAppBarDefaults.topAppBarColors(
+//                            // containerColor = Color.Transparent,
+//                            containerColor = Color.Green,
+//                            //navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+//                            navigationIconContentColor = Color.Red,
+//                            //actionIconContentColor = MaterialTheme.colorScheme.onSurface,
+//                            actionIconContentColor = Color.Blue
+//                        ),
+//                        actions = {
+//                            Icon(
+//                                modifier = Modifier
+//                                    .clickable{
+//                                        imagePicker.launch("image/*")
+//                                    }
+//                                    .padding(end = 16.dp),
+//                                imageVector = Icons.Default.Star,
+//                                contentDescription = "who are you?",
+//                                tint = MaterialTheme.colorScheme.onSurface
+//                            )
+//                            Icon(
+//                                modifier = Modifier
+//                                    .padding(end = 24.dp)
+//                                    .clickable {
+//                                        viewModel.processCommand(EditNoteCommand.Delete)
+//                                    },
+//                                imageVector = Icons.Outlined.Delete,
+//                                contentDescription = "delete"
+//                            )
+//                        },
+//                        navigationIcon = {
+//                            Icon(
+//                                modifier = Modifier
+//                                    .padding(start = 16.dp, end = 8.dp)
+//                                    .clickable {
+//                                        viewModel.processCommand(EditNoteCommand.Back)
+//                                    },
+//                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                                contentDescription = "back arrow"
+//                            )
+//                        }
+//                    )
+//                }
+//            ) { innerPadding ->
+//                Column(modifier = Modifier.padding(innerPadding)) {
+//                    TextField(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(horizontal = 8.dp),
+//                        value = currentState.note.title,//slightly changed
+//                        onValueChange = {
+//                            viewModel.processCommand(InputTitle(it))// мы передаем
+//                            // то что ввели с клавы под видом it во вьюмодель и она там работает с вводом.Видимо обновляет стэйт.
+//                        },
+//                        colors = TextFieldDefaults.colors(
+//                            focusedContainerColor = Color.Red,
+//                            unfocusedContainerColor = Color.Transparent,
+//                            focusedIndicatorColor = Color.Blue,
+//                            unfocusedIndicatorColor = Color.Transparent,
+//                        ),
+//                        textStyle = TextStyle(
+//                            fontSize = 24.sp,
+//                            fontWeight = FontWeight.Bold,
+//                            color = MaterialTheme.colorScheme.onSurface
+//                            //color = Color.White
+//                        ),
+//                        placeholder = {
+//                            Text(
+//
+//                                text = "Title",
+//                                fontSize = 24.sp,
+//                                fontWeight = FontWeight.Bold,
+//                                //color = MaterialTheme.colorScheme.onSurface.copy(0.2f)
+//                                color = Color.Cyan
+//                            )
+//                        }
+//                    )
+//                    Text(
+//                        modifier = Modifier.padding(horizontal = 24.dp),
+//                        text = DateFormatter.formatDateToString(currentState.note.updatedAt),//changed format
+//                        fontSize = 12.sp,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                    Content(
+//                        modifier = Modifier.weight(1f),
+//                        content = currentState.note.content,
+//                        onTextChanged = { index, text ->
+//                            viewModel.processCommand(EditNoteCommand.InputContent(text, index))
+//                        },
+//                        onDeleteImageClick = {
+//                            viewModel.processCommand(EditNoteCommand.DeleteImage(it))
+//                        }
+//                    )
+//                    Button(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(horizontal = 24.dp),
+//                        onClick = {
+//                            viewModel.processCommand(EditNoteCommand.Save)
+//                        },
+//                        shape = RoundedCornerShape(10.dp),
+//                        enabled = currentState.isSaveEnabled,
+//                        colors = ButtonDefaults.buttonColors(
+//                            containerColor = MaterialTheme.colorScheme.primary,
+//                            disabledContentColor = MaterialTheme.colorScheme.primary.copy(0.1f)
+//                        ),
+//                        //contentColor = MaterialTheme.colorScheme.onSurface,
+//                        // disabledContentColor = MaterialTheme.colorScheme.onSurface,
+//                    ) {
+//                        Text(
+//                            text = "Save Note"
+//                        )
+//                    }
+//                }
+//
+//            }
+//        }
+//
+//        EditNoteState.Finished -> {
+//            LaunchedEffect(key1 = Unit) { onFinished() }// key already mentioned before
+//
+//        }
+//
+//        EditNoteState.Initial -> {
+//
+//        }
+//    }
+//}
+//
+//@Composable
+//private fun TextContent(
+//    modifier: Modifier = Modifier,
+//    text: String,
+//    onTextChanged: (String) -> Unit
+//) {
+//    TextField(
+//        modifier = modifier
+//            .fillMaxWidth()
+//            .padding(horizontal = 8.dp),
+//        value = text,
+//        onValueChange = onTextChanged,
+//        colors = TextFieldDefaults.colors(
+//            focusedContainerColor = Color.Transparent,
+//            unfocusedContainerColor = Color.Transparent,
+//            focusedIndicatorColor = Color.Transparent,
+//            unfocusedIndicatorColor = Color.Transparent,
+//        ),
+//        textStyle = TextStyle(
+//            fontSize = 16.sp,
+//            color = MaterialTheme.colorScheme.onSurface
+//        ),
+//        placeholder = {
+//            Text(
+//
+//                text = "write something below...",
+//                fontSize = 16.sp,
+//                color = MaterialTheme.colorScheme.onSurface.copy(0.2f)
+//            )
+//        }
+//    )
+//}
 @Composable
 fun EditNoteScreen(
     modifier: Modifier = Modifier,
-    noteId: Int,// id of the note we pass with constructor
+    noteId: Int,
     viewModel: EditNoteViewModel = hiltViewModel(
         creationCallback = { factory: EditNoteViewModel.Factory ->
             factory.create(noteId)
@@ -53,11 +256,21 @@ fun EditNoteScreen(
     ),
     onFinished: () -> Unit
 ) {
+
     val state = viewModel.state.collectAsState()
     val currentState = state.value
+
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let {
+                viewModel.processCommand(EditNoteCommand.AddImage(it))
+            }
+        }
+    )
+
     when (currentState) {
         is EditNoteState.Editing -> {
-
             Scaffold(
                 modifier = modifier,
                 topBar = {
@@ -71,17 +284,24 @@ fun EditNoteScreen(
                             )
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            // containerColor = Color.Transparent,
-                            containerColor = Color.Green,
-                            //navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                            navigationIconContentColor = Color.Red,
-                            //actionIconContentColor = MaterialTheme.colorScheme.onSurface,
-                            actionIconContentColor = Color.Blue
+                            containerColor = Color.Transparent,
+                            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                            actionIconContentColor = MaterialTheme.colorScheme.onSurface
                         ),
                         actions = {
                             Icon(
                                 modifier = Modifier
-                                    .padding(end = 16.dp)
+                                    .clickable {
+                                        imagePicker.launch("image/*")
+                                    }
+                                    .padding(end = 16.dp),
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "something",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                            Icon(
+                                modifier = Modifier
+                                    .padding(end = 24.dp)
                                     .clickable {
                                         viewModel.processCommand(EditNoteCommand.Delete)
                                     },
@@ -97,66 +317,64 @@ fun EditNoteScreen(
                                         viewModel.processCommand(EditNoteCommand.Back)
                                     },
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "back arrow"
+                                contentDescription = "something"
                             )
                         }
                     )
                 }
             ) { innerPadding ->
-                Column(modifier = Modifier.padding(innerPadding)) {
+                Column(
+                    modifier = Modifier.padding(innerPadding)
+                ) {
                     TextField(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp),
-                        value = currentState.note.title,//slightly changed
+                        value = currentState.note.title,
                         onValueChange = {
-                            viewModel.processCommand(InputTitle(it))// мы передаем
-                            // то что ввели с клавы под видом it во вьюмодель и она там работает с вводом.Видимо обновляет стэйт.
+                            viewModel.processCommand(EditNoteCommand.InputTitle(it))
                         },
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Red,
+                            focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Blue,
+                            focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
                         ),
                         textStyle = TextStyle(
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
-                            //color = Color.White
                         ),
                         placeholder = {
                             Text(
-
                                 text = "Title",
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                //color = MaterialTheme.colorScheme.onSurface.copy(0.2f)
-                                color = Color.Cyan
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
                             )
                         }
                     )
                     Text(
                         modifier = Modifier.padding(horizontal = 24.dp),
-                        text = DateFormatter.formatDateToString(currentState.note.updatedAt),//changed format
+                        text = DateFormatter.formatDateToString(currentState.note.updatedAt),
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                currentState.note.content.filterIsInstance<ContentItem.Text>()// фильтруем оставляя только текст
-                    .forEach { contentItem ->
-                    TextContent(
-                        modifier = Modifier.weight(1f),// для каждого элемента текст вызываем поле ввода
-                        text = contentItem.content,
-                        onTextChanged = {
-                            viewModel.processCommand(EditNoteCommand.InputContent(it))
+                    Content(
+                        modifier = Modifier.weight(1f),
+                        content = currentState.note.content,
+                        onTextChanged = { index, text ->
+                            viewModel.processCommand(EditNoteCommand.InputContent(text, index))
+                        },
+                        onDeleteImageClick = {
+                            viewModel.processCommand(EditNoteCommand.DeleteImage(it))
                         }
-
                     )
-                }
+
                     Button(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
+                            .padding(horizontal = 24.dp)
+                            .fillMaxWidth(),
                         onClick = {
                             viewModel.processCommand(EditNoteCommand.Save)
                         },
@@ -164,60 +382,27 @@ fun EditNoteScreen(
                         enabled = currentState.isSaveEnabled,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
-                            disabledContentColor = MaterialTheme.colorScheme.primary.copy(0.1f)
-                        ),
-                        //contentColor = MaterialTheme.colorScheme.onSurface,
-                        // disabledContentColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(
+                                alpha = 0.1f
+                            ),
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContentColor = MaterialTheme.colorScheme.onPrimary,
+                        )
                     ) {
                         Text(
                             text = "Save Note"
                         )
                     }
                 }
-
             }
         }
 
         EditNoteState.Finished -> {
-            LaunchedEffect(key1 = Unit) { onFinished() }// key already mentioned before
-
+            LaunchedEffect(key1 = Unit) {
+                onFinished()
+            }
         }
 
-        EditNoteState.Initial -> {
-
-        }
+        EditNoteState.Initial -> {}
     }
-}
-
-@Composable
-private fun TextContent(
-    modifier: Modifier = Modifier,
-    text: String,
-    onTextChanged:(String)->Unit
-) {
-    TextField(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        value = text,
-        onValueChange = onTextChanged,
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-        ),
-        textStyle = TextStyle(
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onSurface
-        ),
-        placeholder = {
-            Text(
-
-                text = "write something below...",
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(0.2f)
-            )
-        }
-    )
 }

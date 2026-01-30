@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notes.domain.AddNoteUseCase
 import com.example.notes.domain.ContentItem
+import com.example.notes.domain.ContentItem.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -73,9 +74,10 @@ class CreateNoteViewModel @Inject constructor(private val addNoteUseCase: AddNot
                     _state.update { previousState ->
                         if (previousState is CreateNoteState.Creation) {
                             val title = previousState.title
-                            val content = previousState.content.filter {//оставим в контенте не текст(картинки) или если текст не пустой
-                                it !is ContentItem.Text || it.content.isNotBlank()
-                            }
+                            val content =
+                                previousState.content.filter {//оставим в контенте не текст(картинки) или если текст не пустой
+                                    it !is ContentItem.Text || it.content.isNotBlank()
+                                }
                             addNoteUseCase(title, content)//не забыть добавить заметку
                             CreateNoteState.Finished// мы создали заметку и все, и должны перейти на другой экран
                         } else {
@@ -94,9 +96,25 @@ class CreateNoteViewModel @Inject constructor(private val addNoteUseCase: AddNot
                         if (lastItem is ContentItem.Text && lastItem.content.isBlank()) {
                             newItems.removeAt(newItems.lastIndex)
                         }
-                        newItems.add(ContentItem.Image(command.uri.toString()))
-                        newItems.add(ContentItem.Text(""))
+                        newItems.add(Image(command.uri.toString()))
+                        newItems.add(Text(""))
                         previousState.copy(content = newItems)
+                    } else {
+                        previousState
+                    }
+
+                }
+            }
+
+            is CreateNoteCommand.DeleteImage -> {
+                _state.update { previousState: CreateNoteState ->
+                    if (previousState is CreateNoteState.Creation) {
+
+                        previousState.content.toMutableList().apply {
+                            removeAt(command.index)
+                        }.let {
+                            previousState.copy(content = it)
+                        }
                     } else {
                         previousState
                     }
@@ -115,6 +133,7 @@ sealed interface CreateNoteCommand {
     data class InputContent(val content: String, val index: Int) : CreateNoteCommand
     data object Save : CreateNoteCommand
     data object Back : CreateNoteCommand
+    data class DeleteImage(val index: Int) : CreateNoteCommand
 
 }
 
