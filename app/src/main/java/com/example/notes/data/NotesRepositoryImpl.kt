@@ -26,26 +26,30 @@ class NotesRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun deleteNote(noteId: Int) {
+    override suspend fun deleteNote(noteId: Int) {//если мы удалили заметку с экрана, то и все изображения
+        // из нее должны быть удалены из внутреннего хранилища
         val note = notesDao.getNote(noteId).toEntity()
         notesDao.deleteNote(noteId)
-        note.content
+        note.content//получаем коллекцию с адресами изображений
             .filterIsInstance<ContentItem.Image>()
             .map { it.url }
             .forEach {
-                imageFileManager.deleteImage(it)
+                imageFileManager.deleteImage(it)//и для каждого изображения вызываем delete
             }
     }
 
     override suspend fun editNote(note: Note) {
-        val oldNote = notesDao.getNote(note.id)
+        val oldNote = notesDao.getNote(note.id)//получаем старую заметку из базы с тем же айди
+            // что и редактируем, что бы сравнить изображения из старой и из новой
             .toEntity()//Берем старую заметку из базы и Приводим к модели домэйн слоя
 
-        val oldUrls = oldNote.content.filterIsInstance<ContentItem.Image>()
-            .map { it.url }//проходим по всему контенту фильтруем
+        val oldUrls =
+            oldNote.content.filterIsInstance<ContentItem.Image>()//получаем адреса всех изображений из старой заметки
+                .map { it.url }//проходим по всему контенту фильтруем
         // оставляя картинки и на выходе оставляем коллекцию обьектов String с адресами всех изображений
 
-        val newUrls = note.content.filterIsInstance<ContentItem.Image>().map { it.url }
+        val newUrls = note.content.filterIsInstance<ContentItem.Image>()
+            .map { it.url }//получаем адреса изображений из новой заметки
 
         val removedUrls =
             oldUrls - newUrls//если какие то картинки были в старой коллекции а в новой их нет значит мы их удалили
@@ -55,9 +59,10 @@ class NotesRepositoryImpl @Inject constructor(
         val processedContent =
             note.content.processForStorage()// все новые изображения сохраняем во внутреннее хранилище. Если ничего не добавлено он ничего не сделает
 
-        val processedNote = note.copy(content = processedContent)
+        val processedNote =
+            note.copy(content = processedContent)//обьект с корректными адресами изображений
 
-        notesDao.addNote(processedNote.toDbModel())
+        notesDao.addNote(processedNote.toDbModel())//сохраняем заметку в базу данных приведя к типу NoteDbModel
 
     }
 
@@ -88,8 +93,10 @@ class NotesRepositoryImpl @Inject constructor(
                         contentItem
                     } else {
                         val internalPath =
-                            imageFileManager.copyImageToInternalStorage(contentItem.url)
-                        ContentItem.Image(internalPath)
+                            imageFileManager.copyImageToInternalStorage(contentItem.url)//передаем
+                        // адрес изображения и новый адрес сохраним в переменную
+                        ContentItem.Image(internalPath)//вернем новый обьект с обновленным путем
+                        // к изображению. Теперь адрес из внутреннего хранилища
                     }
                 }
 
