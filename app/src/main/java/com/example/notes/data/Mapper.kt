@@ -22,6 +22,7 @@ fun List<ContentItem>.toContentItemDbModels(): List<ContentItemDbModel> {
         }
     }
 }
+
 fun List<ContentItemDbModel>.toContentItems(): List<ContentItem> {
     return map { contentItem ->
         when (contentItem) {
@@ -37,7 +38,7 @@ fun List<ContentItemDbModel>.toContentItems(): List<ContentItem> {
 }
 
 fun NoteDbModel.toEntity(): Note {
-    val contentItemDbModels=Json.decodeFromString<List<ContentItemDbModel>>(content)
+    val contentItemDbModels = Json.decodeFromString<List<ContentItemDbModel>>(content)
     return Note(id, title, contentItemDbModels.toContentItems(), updatedAt, isPinned)
 }
 
